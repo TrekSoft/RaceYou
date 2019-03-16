@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "507433460074",
+    "firebase_url": "https://zealor-ec1f5.firebaseio.com",
+    "project_id": "zealor-ec1f5",
+    "storage_bucket": "zealor-ec1f5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507433460074:android:8d307f7ca49a4704",
+        "android_client_info": {
+          "package_name": "com.raceyou"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "507433460074-lpg4cce3jr1qlprdd07sdkhcqcnnl8na.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsHNDjaGpDzrUnp8CkySxQsHPJgZkjIGU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:507433460074:android:9d4eaf4db364439e",
+        "android_client_info": {
+          "package_name": "com.zealor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "507433460074-lpg4cce3jr1qlprdd07sdkhcqcnnl8na.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsHNDjaGpDzrUnp8CkySxQsHPJgZkjIGU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

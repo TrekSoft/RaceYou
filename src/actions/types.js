@@ -1,0 +1,4 @@
+export const SET_AVAILABLE_EVENTS = 'SET_AVAILABLE_EVENTS';
+export const SET_USER_EVENTS = 'SET_USER_EVENTS';
+export const SET_USER = 'SET_USER';
+export const UPDATE_USER = 'UPDATE_USER';
