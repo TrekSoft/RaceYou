@@ -15,19 +15,7 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    firebase.auth().signInAnonymously()
-      .then((response) => {
-        const user = response.user._user;
-        this.props.loadUser(user.uid)
-        .then((user) => this.props.loadEvents(user.events))
-        .catch((error) => Alert.alert(
-          'Confirm race signup',
-          'You not registered!',
-          [
-            {text: 'Oops', style: 'cancel'}
-          ],
-          {cancelable: true}))
-      });
+    this.props.loadEvents(this.props.user.events);
   }
 
   eventRegister(event) {

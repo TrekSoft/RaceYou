@@ -22,7 +22,7 @@ export const loadEvents = (userEventIds) => (dispatch) => {
             registrants
           };
 
-          if(userEventIds.includes(id)) {
+          if(userEventIds && userEventIds.includes(id)) {
             if(!userEvents[date]) {
               userEvents[date] = [];
             }
@@ -50,10 +50,10 @@ export const loadEvents = (userEventIds) => (dispatch) => {
 export const registerForEvent = (user, event) => (dispatch) => {
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
-    const userRef = firebase.firestore().collection('Users').doc(user.uid);
+    const userRef = firebase.firestore().collection('Users').doc(user.id);
 
     eventRef.update({
-        registrants: firebase.firestore.FieldValue.arrayUnion(user.uid)
+        registrants: firebase.firestore.FieldValue.arrayUnion(user.id)
     });
 
     userRef.update({

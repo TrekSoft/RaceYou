@@ -21,7 +21,13 @@ class Loading extends Component {
     .then((response) => {
       const user = response.user._user;
       this.props.loadUser(user.uid)
-      .then((user) => this.props.loadEvents(user.events))
+      .then((user) => {
+        if(user.username) {
+          this.props.navigation.navigate('Home');
+        }
+
+        this.setState({isLoading: false});
+      })
       .catch(() => this.setState({isLoading: false}) );
     });
   }
@@ -60,7 +66,7 @@ class Loading extends Component {
     return (
       <Container>
         <Content contentContainerStyle={[styles.page, styles.verticalCenter]}>
-          <Text style={styles.logo}>Zealor</Text>
+          <Text style={styles.logo}>RaceYou</Text>
           { this.renderForm() }
         </Content>
       </Container>
