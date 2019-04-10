@@ -11,6 +11,11 @@ export const button = {
   justifyContent: 'center'
 };
 
+export const buttonDisabled = {
+  ...button,
+  backgroundColor: '#19212A'
+};
+
 export const header = {
   fontSize: 25,
   color: fontWhite,

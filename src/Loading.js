@@ -13,6 +13,7 @@ class Loading extends Component {
 
   state = {
     isLoading: true,
+    isSubmitting: false,
     username: ''
   };
 
@@ -24,9 +25,9 @@ class Loading extends Component {
       .then((user) => {
         if(user.username) {
           this.props.navigation.navigate('Home');
+        } else {
+          this.setState({isLoading: false});
         }
-
-        this.setState({isLoading: false});
       })
       .catch(() => this.setState({isLoading: false}) );
     });
@@ -37,7 +38,26 @@ class Loading extends Component {
   }
 
   onUsernameSubmit = () => {
-    this.props.setUsername(this.props.user, this.state.username);
+    this.setState({isSubmitting: true});
+
+    this.props.setUsername(this.props.user, this.state.username)
+    .then(() => this.props.navigation.navigate('Home'));
+  }
+
+  renderSubmitButton = () => {
+    if (this.state.isSubmitting) {
+      return (
+        <Button style={styles.buttonDisabled} disabled>
+          <Text>Submitting</Text>
+        </Button>
+      )
+    } else {
+      return (
+        <Button style={styles.button} onPress={this.onUsernameSubmit}>
+          <Text>Submit</Text>
+        </Button>
+      );
+    }
   }
 
   renderForm() {
@@ -54,9 +74,7 @@ class Loading extends Component {
               onChangeText={this.onUsernameChange}
             />
           </Item>
-          <Button primary style={styles.button} onPress={this.onUsernameSubmit}>
-            <Text>Submit</Text>
-          </Button>
+          {this.renderSubmitButton()}
         </View>
       );
     }
