@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { Container, Content, Button, Text, Input, Item } from 'native-base';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
+import { showErrorToast } from './utils/ErrorToast';
 import * as styles from './styles';
 import * as actions from './actions';
 
@@ -30,7 +31,8 @@ class Loading extends Component {
         }
       })
       .catch(() => this.setState({isLoading: false}) );
-    });
+    })
+    .catch(() => showErrorToast('Must have internet connection'));
   }
 
   onUsernameChange = (username) => {

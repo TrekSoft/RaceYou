@@ -1,44 +1,21 @@
 import firebase from 'react-native-firebase';
 import {
-  SET_USER_EVENTS,
-  SET_AVAILABLE_EVENTS
+  SET_EVENTS,
+  UPDATE_EVENT,
+  UPDATE_USER
 } from './types';
 
 export const loadEvents = (userEventIds) => (dispatch) => {
   return new Promise((resolve, reject) => {
     firebase.firestore().collection('Events').orderBy("time").limit(20).get()
     .then((response) => {
-        let availableEvents = {};
-        let userEvents = {};
+        let events = {};
 
         response.forEach((doc) => {
-          const id = doc.id;
-          const { time, distance, registrants } = doc.data();
-          const date = time.toLocaleDateString("en-US");
-          const event = {
-            id,
-            time,
-            distance,
-            registrants
-          };
-
-          if(userEventIds && userEventIds.includes(id)) {
-            if(!userEvents[date]) {
-              userEvents[date] = [];
-            }
-
-            userEvents[date].push({...event, isRegistered: true});
-          } else {
-            if(!availableEvents[date]) {
-              availableEvents[date] = [];
-            }
-
-            availableEvents[date].push({...event, isRegistered: false});
-          }
+          events[doc.id] = getEvent(doc);
         });
 
-        dispatch({ type: SET_USER_EVENTS, payload: userEvents });
-        dispatch({ type: SET_AVAILABLE_EVENTS, payload: availableEvents });
+        dispatch({ type: SET_EVENTS, payload: events });
         resolve();
     })
     .catch((error) => {
@@ -51,13 +28,29 @@ export const registerForEvent = (user, event) => (dispatch) => {
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
     const userRef = firebase.firestore().collection('Users').doc(user.id);
+    event.registrants.push(user.id);
+    user.events.push(event.id);
 
-    eventRef.update({
-        registrants: firebase.firestore.FieldValue.arrayUnion(user.id)
+    eventRef.update({registrants: event.registrants})
+    .then(() => {
+      dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
     });
 
-    userRef.update({
-        events: firebase.firestore.FieldValue.arrayUnion(event.id)
+    userRef.update({events: user.events})
+    .then(() => {
+      dispatch({ type: UPDATE_USER, payload: user })
     });
   });
 };
+
+function getEvent(doc) {
+  const id = doc.id;
+  const { time, distance, registrants } = doc.data();
+
+  return {
+    id,
+    time,
+    distance,
+    registrants
+  };
+}

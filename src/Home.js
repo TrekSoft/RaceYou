@@ -14,8 +14,13 @@ class Home extends Component {
       header: null
   }
 
+  state = {
+    loadingEvents: true
+  }
+
   componentDidMount() {
-    this.props.loadEvents(this.props.user.events);
+    this.props.loadEvents(this.props.user.events)
+    .then(() => this.setState({loadingEvents: false}));
   }
 
   eventRegister(event) {
@@ -77,10 +82,14 @@ class Home extends Component {
             </View>
           );
       });
+    } else if(this.state.loadingEvents) {
+      return (
+        <Text style={styles.listText}>{'Loading events... \n (Internet connection required)'}</Text>
+      );
     } else {
       return (
-        <Text style={styles.listText}>{unavailableMessage}</Text>
-      );
+        <Text style={styles.listText}>{'No events found'}</Text>
+      )
     }
   }
 
@@ -93,7 +102,7 @@ class Home extends Component {
           </View>
           <View style={styles.listBox}>
             <ScrollView>
-              {this.renderDates(this.props.userEvents, 'You currently have no upcoming events.\n Sign up for one below.')}
+              {this.renderDates(this.props.userEvents)}
             </ScrollView>
           </View>
 
@@ -102,7 +111,7 @@ class Home extends Component {
           </View>
           <View style={[styles.listBox, { flex: 1, marginBottom: 20 }]}>
             <ScrollView>
-              {this.renderDates(this.props.availableEvents, 'Loading events...\n (internet connection required)')}
+              {this.renderDates(this.props.availableEvents)}
             </ScrollView>
           </View>
         </Content>
@@ -111,12 +120,36 @@ class Home extends Component {
   }
 }
 
-const mapStateToProps = state => (
-  {
-    userEvents: state.events.userEvents,
-    availableEvents: state.events.availableEvents,
+const mapStateToProps = (state) => {
+  const events = state.events.list;
+  const userId = state.user.id;
+
+  const userEvents = [];
+  const availableEvents = [];
+
+  Object.values(events).forEach(event => {
+    const date = event.time.toLocaleDateString("en-US");
+
+    if(event.registrants.includes(userId)) {
+      if(!userEvents[date]) {
+        userEvents[date] = [];
+      }
+
+      userEvents[date].push(event);
+    } else {
+      if(!availableEvents[date]) {
+        availableEvents[date] = [];
+      }
+
+      availableEvents[date].push(event);
+    }
+  });
+
+  return {
+    userEvents,
+    availableEvents,
     user: state.user
-  }
-);
+  };
+};
 
 export default connect(mapStateToProps, actions)(Home);

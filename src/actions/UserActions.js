@@ -13,12 +13,8 @@ export const loadUser = (userId) => (dispatch) => {
   return new Promise((resolve, reject) => {
     const userRef = firebase.firestore().collection('Users').doc(userId);
 
-    console.log(userRef);
-
     userRef.get()
     .then((response) => {
-      console.log(response);
-
       if (response.exists) {
         const user = {
           id: userId,
@@ -26,25 +22,21 @@ export const loadUser = (userId) => (dispatch) => {
         }
 
         dispatch({ type: SET_USER, payload: user });
-        console.log('Set existing user: ' + user);
         resolve(user);
       } else {
         const user = { id: userId };
 
         userRef.set(user)
         .then(() => {
-          console.log('Set new user: ' + user);
           dispatch({ type: SET_USER, payload: user });
           resolve(user);
         })
         .catch((error) => {
-          console.log('New user error: ' + error);
           reject(error.message);
         });
       }
     })
     .catch((error) => {
-      console.log('Check user error: ' + error);
       reject(error.message);
     });
   });
@@ -61,7 +53,6 @@ export const setUsername = (user, name) => (dispatch) => {
       resolve();
     })
     .catch((error) => {
-      console.log('Update username error: ' + error);
       reject(error.message);
     });
   });
