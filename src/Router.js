@@ -1,11 +1,13 @@
 import { createStackNavigator, createAppContainer } from 'react-navigation';
-import Home from './Home';
 import Loading from './Loading';
+import Home from './Home';
+import EventDetails from './EventDetails';
 
 const Router = createStackNavigator(
   {
     Loading,
-    Home
+    Home,
+    EventDetails
   },
   {
     initialRouteName: 'Loading',

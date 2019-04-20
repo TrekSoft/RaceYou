@@ -28,6 +28,15 @@ export const registerForEvent = (user, event) => (dispatch) => {
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
     const userRef = firebase.firestore().collection('Users').doc(user.id);
+    
+    if(!event.registrants) {
+      event.registrants = [];
+    }
+
+    if(!user.events) {
+      user.events = [];
+    }
+
     event.registrants.push(user.id);
     user.events.push(event.id);
 

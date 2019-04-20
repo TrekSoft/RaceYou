@@ -41,7 +41,7 @@ class Home extends Component {
     );
   }
 
-  renderEvents(events) {
+  renderEvents(events, isRegistered) {
     return events.map(
       (event, index) =>
         <EventCard
@@ -50,15 +50,17 @@ class Home extends Component {
           time={event.time.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}
           numRegistered={event.registrants.length}
           callback={() => {
-            if (!event.isRegistered) {
+            if (!isRegistered) {
               this.eventRegister(event);
+            } else {
+              this.props.navigation.navigate('EventDetails', { eventId: event.id });
             }
           }}
         />
     );
   }
 
-  renderDates(dates, unavailableMessage) {
+  renderDates(dates, isRegistered) {
     if (dates && Object.keys(dates).length > 0) {
       const self = this;
 
@@ -77,7 +79,7 @@ class Home extends Component {
                 <Text style={{ fontSize: 15, color: '#666666' }}>{ year }</Text>
               </View>
               <View style={{ flexDirection: 'column', flex: 1 }}>
-                {self.renderEvents(events)}
+                {self.renderEvents(events, isRegistered)}
               </View>
             </View>
           );
@@ -102,7 +104,7 @@ class Home extends Component {
           </View>
           <View style={styles.listBox}>
             <ScrollView>
-              {this.renderDates(this.props.userEvents)}
+              {this.renderDates(this.props.userEvents, true)}
             </ScrollView>
           </View>
 
@@ -111,7 +113,7 @@ class Home extends Component {
           </View>
           <View style={[styles.listBox, { flex: 1, marginBottom: 20 }]}>
             <ScrollView>
-              {this.renderDates(this.props.availableEvents)}
+              {this.renderDates(this.props.availableEvents, false)}
             </ScrollView>
           </View>
         </Content>

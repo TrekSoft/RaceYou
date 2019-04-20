@@ -16,10 +16,22 @@ export const buttonDisabled = {
   backgroundColor: '#19212A'
 };
 
+export const countdown = {
+  fontSize: 25,
+  color: '#00ff00',
+  marginTop: 10,
+  alignSelf: 'center'
+};
+
 export const header = {
   fontSize: 25,
   color: fontWhite,
   marginBottom: 15
+};
+
+export const headerCentered = {
+  ...header,
+  textAlign: 'center'
 };
 
 export const logo = {
@@ -37,6 +49,12 @@ export const listBox = {
   borderRadius: 5,
   paddingBottom: 10
 };
+
+export const listBoxDark = {
+  ...listBox,
+  backgroundColor: '#272727',
+  borderColor: '#000'
+}
 
 export const listHeaderContainer = {
   marginTop: 50,
