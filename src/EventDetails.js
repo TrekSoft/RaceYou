@@ -44,13 +44,19 @@ class EventDetails extends Component {
             </Text>
           </View>
 
-          <View style={styles.listBoxDark}>
+          <View style={[styles.listBoxDark, {marginBottom: 30}]}>
             <Text style={styles.countdown}>
               <Text style={styles.countdown}>{Math.floor(this.state.timeLeft/60/60/24)}d </Text>
               <Text style={styles.countdown}>{Math.floor(this.state.timeLeft/60/60) % 24}h </Text>
               <Text style={styles.countdown}>{Math.floor(this.state.timeLeft/60) % 60}m </Text>
               <Text style={styles.countdown}>{Math.floor(this.state.timeLeft) % 60}s </Text>
             </Text>
+          </View>
+
+          <View style={[styles.listBox, {padding: 20}]}>
+            <ScrollView>
+              <Text style={{ fontSize: 20 }}>Participants:</Text>
+            </ScrollView>
           </View>
         </Content>
       </Container>

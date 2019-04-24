@@ -19,7 +19,7 @@ class Home extends Component {
   }
 
   componentDidMount() {
-    this.props.loadEvents(this.props.user.events)
+    this.props.loadEvents()
     .then(() => this.setState({loadingEvents: false}));
   }
 
@@ -48,7 +48,7 @@ class Home extends Component {
           key={index}
           distance={Number.parseFloat(event.distance).toFixed(1)}
           time={event.time.toLocaleTimeString('en-US', {hour: 'numeric', minute: '2-digit', hour12: true})}
-          numRegistered={event.registrants.length}
+          numRegistered={Object.keys(event.registrants).length}
           callback={() => {
             if (!isRegistered) {
               this.eventRegister(event);
@@ -132,7 +132,7 @@ const mapStateToProps = (state) => {
   Object.values(events).forEach(event => {
     const date = event.time.toLocaleDateString("en-US");
 
-    if(event.registrants.includes(userId)) {
+    if(Object.keys(event.registrants).includes(userId)) {
       if(!userEvents[date]) {
         userEvents[date] = [];
       }

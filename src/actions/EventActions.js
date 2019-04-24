@@ -5,7 +5,7 @@ import {
   UPDATE_USER
 } from './types';
 
-export const loadEvents = (userEventIds) => (dispatch) => {
+export const loadEvents = () => (dispatch) => {
   return new Promise((resolve, reject) => {
     firebase.firestore().collection('Events').orderBy("time").limit(20).get()
     .then((response) => {
@@ -28,17 +28,17 @@ export const registerForEvent = (user, event) => (dispatch) => {
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
     const userRef = firebase.firestore().collection('Users').doc(user.id);
-    
+
     if(!event.registrants) {
-      event.registrants = [];
+      event.registrants = {};
     }
 
     if(!user.events) {
-      user.events = [];
+      user.events = {};
     }
 
-    event.registrants.push(user.id);
-    user.events.push(event.id);
+    event.registrants[user.id] = {id: user.id, username: user.username};
+    user.events[event.id] = {id: event.id};
 
     eventRef.update({registrants: event.registrants})
     .then(() => {
