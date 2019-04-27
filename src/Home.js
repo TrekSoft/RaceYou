@@ -133,6 +133,8 @@ const mapStateToProps = (state) => {
     const date = event.time.toLocaleDateString("en-US");
 
     if(Object.keys(event.registrants).includes(userId)) {
+      console.log(event, userId);
+
       if(!userEvents[date]) {
         userEvents[date] = [];
       }

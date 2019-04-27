@@ -7,7 +7,7 @@ import {
 
 export const loadEvents = () => (dispatch) => {
   return new Promise((resolve, reject) => {
-    firebase.firestore().collection('Events').orderBy("time").limit(20).get()
+    firebase.firestore().collection('Events').where("time", ">", new Date()).orderBy("time").limit(20).get()
     .then((response) => {
         let events = {};
 
@@ -43,11 +43,32 @@ export const registerForEvent = (user, event) => (dispatch) => {
     eventRef.update({registrants: event.registrants})
     .then(() => {
       dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
-    });
 
-    userRef.update({events: user.events})
+      userRef.update({events: user.events})
+      .then(() => {
+        dispatch({ type: UPDATE_USER, payload: user });
+      });
+    });
+  });
+};
+
+export const cancelEvent = (user, event) => (dispatch) => {
+  return new Promise((resolve, reject) => {
+    const eventRef = firebase.firestore().collection('Events').doc(event.id);
+    const userRef = firebase.firestore().collection('Users').doc(user.id);
+
+    delete user.events[event.id];
+    delete event.registrants[user.id];
+
+    eventRef.update({registrants: event.registrants})
     .then(() => {
-      dispatch({ type: UPDATE_USER, payload: user })
+      dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
+
+      userRef.update({events: user.events})
+      .then(() => {
+        dispatch({ type: UPDATE_USER, payload: user });
+        resolve();
+      });
     });
   });
 };

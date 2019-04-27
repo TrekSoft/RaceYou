@@ -11,6 +11,11 @@ export const button = {
   justifyContent: 'center'
 };
 
+export const buttonLight = {
+  ...button,
+  backgroundColor: '#444'
+};
+
 export const buttonDisabled = {
   ...button,
   backgroundColor: '#19212A'

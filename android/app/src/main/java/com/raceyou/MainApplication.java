@@ -8,6 +8,7 @@ import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
+import com.google.firebase.database.FirebaseDatabase;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -50,6 +51,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    FirebaseDatabase.getInstance().setPersistenceEnabled(false);
     SoLoader.init(this, /* native exopackage */ false);
   }
 }

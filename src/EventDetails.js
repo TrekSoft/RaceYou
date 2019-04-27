@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Alert } from 'react-native';
 import { Container, Content, Button, Text } from 'native-base';
+import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import * as styles from './styles';
 import * as actions from './actions';
@@ -18,6 +19,8 @@ class EventDetails extends Component {
 
   componentWillMount() {
     this.event = this.props.events[this.props.navigation.getParam('eventId')];
+    // const currentTime = new Date();
+    // this.event.time = new Date(currentTime.getTime() + 5000);
     this.updateCountdown();
     this.countdown = setInterval(this.updateCountdown.bind(this), 1000);
   }
@@ -25,11 +28,38 @@ class EventDetails extends Component {
   updateCountdown() {
     const currentDate = new Date();
     const startDate = this.event.time;
-    this.setState({ timeLeft: Math.floor((startDate.getTime() - currentDate.getTime()) / 1000) });
+    const timeLeft = Math.floor((startDate.getTime() - currentDate.getTime()) / 1000);
+
+    if(timeLeft <= 0) {
+      this.props.navigation.navigate('Race', { eventId: this.event.id });
+    }
+
+    this.setState({ timeLeft });
   }
 
   clearCountdown() {
     clearInterval(this.countdown);
+  }
+
+  cancelEvent() {
+    Alert.alert(
+      'Confirm race cancellation',
+      'Are you sure you don\'t want to run in this event?',
+      [
+        {text: 'No, keep it', style: 'cancel'},
+        {text: 'Yeah, I\'m sure', onPress: () =>
+          this.props.cancelEvent(this.props.user, this.event)
+            .then(() => this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0))
+        },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  renderParticipants() {
+    return Object.values(this.event.registrants).map((registrant, index) =>
+      <Text key={index}>{registrant.username}</Text>
+    );
   }
 
   render() {
@@ -53,11 +83,16 @@ class EventDetails extends Component {
             </Text>
           </View>
 
-          <View style={[styles.listBox, {padding: 20}]}>
+          <View style={[styles.listBox, {padding: 20, paddingBottom: 20, marginBottom: 30, flex: 1}]}>
+            <Text style={{ fontSize: 20, marginBottom: 5 }}>Participants:</Text>
             <ScrollView>
-              <Text style={{ fontSize: 20 }}>Participants:</Text>
+              {this.renderParticipants()}
             </ScrollView>
           </View>
+
+          <Button style={[styles.buttonLight, {marginBottom: 20}]} onPress={() => this.cancelEvent()}>
+            <Text>Cancel Registration</Text>
+          </Button>
         </Content>
       </Container>
     );
@@ -66,6 +101,7 @@ class EventDetails extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    user: state.user,
     events: state.events.list
   };
 };
