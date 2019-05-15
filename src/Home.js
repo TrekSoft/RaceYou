@@ -53,7 +53,7 @@ class Home extends Component {
             if (!isRegistered) {
               this.eventRegister(event);
             } else {
-              this.props.navigation.navigate('EventDetails', { eventId: event.id });
+              this.props.navigation.navigate('Race', { eventId: event.id });
             }
           }}
         />

@@ -22,8 +22,47 @@ class Race extends Component {
   render() {
     return (
       <Container>
-        <Content contentContainerStyle={[styles.page, styles.verticalTop]}>
-          <Text>HELLO WORLD</Text>
+        <Content contentContainerStyle={[styles.pageLight, styles.verticalTop, {paddingHorizontal: 0}]}>
+          <View style={styles.raceHeader}>
+            <View style={styles.raceHeaderSection}>
+              <Text style={styles.raceHeaderText}>.3</Text>
+              <Text style={styles.raceHeaderSubtext}>miles</Text>
+            </View>
+            <View style={styles.raceHeaderDivider}></View>
+            <View style={styles.raceHeaderSection}>
+              <Text style={styles.raceHeaderText}>1:34</Text>
+              <Text style={styles.raceHeaderSubtext}>runtime</Text>
+            </View>
+            <View style={styles.raceHeaderDivider}></View>
+            <View style={styles.raceHeaderSection}>
+              <Text style={styles.raceHeaderText}>3rd</Text>
+              <Text style={styles.raceHeaderSubtext}>/ 46</Text>
+            </View>
+          </View>
+          <View style={{flex: 1, width: '100%', flexDirection: 'column'}}>
+            <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{height: 5, width: '100%', backgroundColor: 'grey', justifyContent: 'center'}}>
+                <View style={{ paddingLeft: '0%', flexDirection: 'row', alignItems: 'center'}}>
+                  <View style={{height: 20, width: 20, borderRadius: 45, marginRight: 10, backgroundColor:'black'}}></View>
+                  <View style={{padding: 5, borderRadius: 5, backgroundColor: 'white'}}>
+                    <Text style={{fontWeight: "bold"}}>Elfindel</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{height: 5, width: '100%', backgroundColor: 'grey'}}></View>
+            </View>
+            <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{height: 5, width: '100%', backgroundColor: 'grey'}}></View>
+            </View>
+            <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{height: 5, width: '100%', backgroundColor: 'grey'}}></View>
+            </View>
+            <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+              <View style={{height: 5, width: '100%', backgroundColor: 'grey'}}></View>
+            </View>
+          </View>
         </Content>
       </Container>
     );

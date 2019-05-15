@@ -1,4 +1,5 @@
 const fontWhite = '#fff';
+const backgroundGrey = '#d9d9d9';
 
 export const button = {
   width: '100%',
@@ -48,7 +49,7 @@ export const logo = {
 export const listBox = {
   width: '100%',
   minHeight: 40,
-  backgroundColor: '#d9d9d9ff',
+  backgroundColor: backgroundGrey,
   borderColor: '#595959',
   borderWidth: 2,
   borderRadius: 5,
@@ -81,6 +82,42 @@ export const page = {
   paddingHorizontal: '10%',
   height: '100%'
 };
+
+export const pageLight = {
+  ...page,
+  backgroundColor: backgroundGrey
+}
+
+export const raceHeader = {
+  width: '100%',
+  height: 100,
+  backgroundColor: '#272727',
+  flexDirection: 'row',
+  alignItems: 'center'
+};
+
+export const raceHeaderDivider = {
+  width: 2,
+  height: '80%',
+  backgroundColor: 'white'
+};
+
+export const raceHeaderSection = {
+  flex: 1,
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center'
+};
+
+export const raceHeaderSubtext = {
+  fontSize: 25,
+  color: '#009900'
+}
+
+export const raceHeaderText = {
+  fontSize: 35,
+  color: '#00ff00'
+}
 
 export const verticalTop = {
   justifyContent: 'flex-start'
