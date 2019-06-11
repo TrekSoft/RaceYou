@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { View, ScrollView, Alert } from 'react-native';
-import { Container, Content, Button, Text } from 'native-base';
+import { View, ScrollView, Alert, Text } from 'react-native';
+import { Container, Content, Button } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
@@ -19,15 +19,16 @@ class Race extends Component {
     longitude: null,
     latitude: null,
     altitude: null,
-    distance: 0.0
+    distance: 0.0,
+    time: 0
   }
 
-  willLeavePage = this.props.navigation.addListener('willBlur', this.clearLocationUpdater.bind(this));
+  willLeavePage = this.props.navigation.addListener('willBlur', this.clearUpdater.bind(this));
 
   componentWillMount() {
     firebase.firestore().collection('Events').doc(this.state.event.id).get()
     .then((response) => {
-      const event = {...response.data(), id: response.id};
+      const event = {...response.data(), id: response.id, time: new Date()};
       this.setState({event});
 
       const user = event.registrants[this.props.user.id];
@@ -40,15 +41,20 @@ class Race extends Component {
       showErrorToast('Failed to load event data');
     });
 
-    this.getLocation();
-    this.locationUpdater = setInterval(this.getLocation.bind(this), 1000);
+    this.updateReadout();
+    this.readoutUpdater = setInterval(this.updateReadout.bind(this), 1000);
   }
 
-  clearLocationUpdater() {
-    clearInterval(this.locationUpdater);
+  clearUpdater() {
+    clearInterval(this.readoutUpdater);
   }
 
-  getLocation() {
+  updateReadout() {
+    // Update time
+    const now = new Date();
+    this.setState({ time: (now.getTime() - this.state.event.time.getTime()) / 1000 });
+
+    // Update location
     navigator.geolocation.getCurrentPosition(
       position => {
         const oldLat = this.state.latitude;
@@ -95,7 +101,11 @@ class Race extends Component {
             </View>
             <View style={styles.raceHeaderDivider}></View>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>2:24</Text>
+              <Text style={styles.raceHeaderText}>
+                {zeroPad(Math.floor(this.state.time/60))}
+                :
+                {zeroPad(Math.floor(this.state.time) % 60)}
+              </Text>
               <Text style={styles.raceHeaderSubtext}>runtime</Text>
             </View>
             <View style={styles.raceHeaderDivider}></View>
@@ -115,6 +125,10 @@ class Race extends Component {
       </Container>
     );
   }
+}
+
+function zeroPad(myNumber) {
+  return ("0" + myNumber).slice(-2);
 }
 
 function degreesToRadians(degrees) {
