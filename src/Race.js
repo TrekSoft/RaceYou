@@ -15,32 +15,23 @@ class Race extends Component {
   }
 
   state = {
-    event: this.props.events[this.props.navigation.getParam('eventId')],
+    event: null,
     longitude: null,
     latitude: null,
     altitude: null,
     distance: 0.0,
-    time: 0
+    b1: null,
+    b2: null,
+    a1: null,
+    a2: null,
+    time: 0,
+    place: 0,
+    totalRunners: 0
   }
 
   willLeavePage = this.props.navigation.addListener('willBlur', this.clearUpdater.bind(this));
 
-  componentWillMount() {
-    firebase.firestore().collection('Events').doc(this.state.event.id).get()
-    .then((response) => {
-      const event = {...response.data(), id: response.id, time: new Date()};
-      this.setState({event});
-
-      const user = event.registrants[this.props.user.id];
-
-      if(user.distance) {
-        this.setState({distance: user.distance});
-      }
-    })
-    .catch((error) => {
-      showErrorToast('Failed to load event data');
-    });
-
+  componentDidMount() {
     this.updateReadout();
     this.readoutUpdater = setInterval(this.updateReadout.bind(this), 1000);
   }
@@ -50,44 +41,93 @@ class Race extends Component {
   }
 
   updateReadout() {
-    // Update time
-    const now = new Date();
-    this.setState({ time: (now.getTime() - this.state.event.time.getTime()) / 1000 });
-
     // Update location
     navigator.geolocation.getCurrentPosition(
       position => {
-        const oldLat = this.state.latitude;
-        const oldLon = this.state.longitude;
-        const newLat = position.coords.latitude;
-        const newLon = position.coords.longitude;
-        let newDist;
+        // Get latest copy of the event before updating it
+        const doc = firebase.firestore().collection('Events').doc(this.props.navigation.getParam('eventId'));
 
-        if(oldLat != null && oldLon != null) {
-          newDist = (parseFloat(this.state.distance) + parseFloat(distanceInMiles(oldLat, oldLon, newLat, newLon))).toFixed(2);
-        } else {
-          newDist = this.state.distance;
-        }
+        doc.get()
+        .then((response) => {
+          const event = {...response.data(), id: response.id};
+          this.setState({event});
 
-        let newRegistrants = this.state.event.registrants;
-        newRegistrants[this.props.user.id].distance = newDist;
+          // Update time
+          const now = new Date();
+          this.setState({ time: (now.getTime() - this.state.event.time.getTime()) / 1000 });
 
-        firebase.firestore().collection('Events').doc(this.state.event.id)
-        .set({registrants: newRegistrants}, { merge: true })
-        .then(() => {
-          this.setState({
-            longitude: newLon,
-            latitude: newLat,
-            altitude: position.coords.altitude,
-            distance: newDist
-          });
+          const user = event.registrants[this.props.user.id];
+
+          if(user.distance) {
+            this.setState({distance: parseFloat(user.distance)});
+          }
+
+          const oldLat = this.state.latitude;
+          const oldLon = this.state.longitude;
+          const newLat = position.coords.latitude;
+          const newLon = position.coords.longitude;
+          let newDist;
+
+          if(oldLat != null && oldLon != null) {
+            newDist = parseFloat(this.state.distance) + parseFloat(distanceInMiles(oldLat, oldLon, newLat, newLon));
+          } else {
+            newDist = this.state.distance;
+          }
+
+          let newRegistrants = this.state.event.registrants;
+          newRegistrants[this.props.user.id].distance = newDist;
+
+          doc.set({registrants: newRegistrants}, { merge: true })
+          .then(() => {
+            this.setState({
+              longitude: newLon,
+              latitude: newLat,
+              altitude: position.coords.altitude,
+              distance: newDist
+            });
+          })
+          .catch(() => showErrorToast('Failed to upload race progress data'));
+
+          let runnersArray = [];
+          for(key in newRegistrants) {
+            runnersArray.push(newRegistrants[key]);
+          }
+
+          runnersArray.sort((a, b) => (b.distance - a.distance));
+
+          for(let i=0; i<runnersArray.length; i++) {
+            if(runnersArray[i].id == user.id) {
+              this.setState({ place: i+1, totalRunners: runnersArray.length });
+            }
+          }
+
+          //this.setState({a1, a2, b1, b2});
         })
-        .catch(() => showErrorToast('Failed to upload race progress data'));
-
+        .catch(() => showErrorToast('Failed to retrieve race data'));;
       },
       error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
+  }
+
+  renderRunners() {
+    if(this.state.event) {
+      return (
+        <>
+          {this.state.a2 ? <Runner percentComplete={(this.state.a2.distance / this.state.event.distance) * 100} username={this.state.a2.username} /> : <></>}
+          {this.state.a1 ? <Runner percentComplete={(this.state.a1.distance / this.state.event.distance) * 100} username={this.state.a1.username} /> : <></>}
+          <Runner percentComplete={(this.state.distance / this.state.event.distance) * 100} username={this.props.user.username} />
+          {this.state.b1 ? <Runner percentComplete={(this.state.b1.distance / this.state.event.distance) * 100} username={this.state.b1.username} /> : <></>}
+          {this.state.b2 ? <Runner percentComplete={(this.state.b2.distance / this.state.event.distance) * 100} username={this.state.b2.username} /> : <></>}
+        </>
+      );
+    } else {
+      return (
+        <View style={{flex:1, width:'100%', justifyContent: 'center', alignItems: 'center'}}>
+          <Text>Acquiring GPS...</Text>
+        </View>
+      );
+    }
   }
 
   render() {
@@ -96,7 +136,7 @@ class Race extends Component {
         <Content contentContainerStyle={[styles.pageLight, styles.verticalTop, {paddingHorizontal: 0}]}>
           <View style={styles.raceHeader}>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>{this.state.distance}</Text>
+              <Text style={styles.raceHeaderText}>{this.state.distance.toFixed(2)}</Text>
               <Text style={styles.raceHeaderSubtext}>miles</Text>
             </View>
             <View style={styles.raceHeaderDivider}></View>
@@ -110,16 +150,12 @@ class Race extends Component {
             </View>
             <View style={styles.raceHeaderDivider}></View>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>3rd</Text>
-              <Text style={styles.raceHeaderSubtext}>/ 46</Text>
+              <Text style={styles.raceHeaderText}>{this.state.place}</Text>
+              <Text style={styles.raceHeaderSubtext}>/ {this.state.totalRunners}</Text>
             </View>
           </View>
           <View style={{flex: 1, width: '100%', flexDirection: 'column'}}>
-            <Runner percentComplete="60" username="good-guy" />
-            <Runner percentComplete="55" username="myruggy89" />
-            <Runner percentComplete={(this.state.distance / this.state.event.distance) * 100} username={this.props.user.username} />
-            <Runner percentComplete="32" username="Patches46" />
-            <Runner percentComplete="21" username="dwreyes" />
+            {this.renderRunners()}
           </View>
         </Content>
       </Container>
@@ -156,8 +192,7 @@ function distanceInKm(lat1, lon1, lat2, lon2) {
 
 const mapStateToProps = (state) => {
   return {
-    user: state.user,
-    events: state.events.list
+    user: state.user
   };
 };
 
