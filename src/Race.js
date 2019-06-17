@@ -25,8 +25,8 @@ class Race extends Component {
     a1: null,
     a2: null,
     time: 0,
-    place: 0,
-    totalRunners: 0
+    place: '--',
+    totalRunners: '--'
   }
 
   willLeavePage = this.props.navigation.addListener('willBlur', this.clearUpdater.bind(this));
@@ -98,10 +98,29 @@ class Race extends Component {
           for(let i=0; i<runnersArray.length; i++) {
             if(runnersArray[i].id == user.id) {
               this.setState({ place: i+1, totalRunners: runnersArray.length });
+
+              let a1, a2, b1, b2;
+              a1 = a2 = b1 = b2 = null;
+
+              if(i>=2) {
+                a2 = runnersArray[i-2];
+              }
+
+              if(i>=1) {
+                a1 = runnersArray[i-1];
+              }
+
+              if(i<runnersArray.length-2) {
+                b2 = runnersArray[i+2];
+              }
+
+              if(i<runnersArray.length-1) {
+                b1 = runnersArray[i+1];
+              }
+
+              this.setState({ a1, a2, b1, b2 });
             }
           }
-
-          //this.setState({a1, a2, b1, b2});
         })
         .catch(() => showErrorToast('Failed to retrieve race data'));;
       },
