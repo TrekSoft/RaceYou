@@ -35,7 +35,7 @@ class Home extends Component {
       '?',
       [
         {text: 'Oops, nope', style: 'cancel'},
-        {text: 'Let\'s gooo!', onPress: () => this.props.registerForEvent(this.props.user, event)},
+        {text: 'Let\'s go!', onPress: () => this.props.registerForEvent(this.props.user, event)},
       ],
       { cancelable: false }
     );

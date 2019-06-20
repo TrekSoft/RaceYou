@@ -128,5 +128,6 @@ export const verticalCenter = {
 };
 
 export const whiteText = {
-  color: fontWhite
+  color: fontWhite,
+  fontSize: 25
 }

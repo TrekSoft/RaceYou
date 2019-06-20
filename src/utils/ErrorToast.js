@@ -5,7 +5,7 @@ export const showErrorToast = (error) => {
     text: error,
     buttonText: 'Okay',
     style: {
-      backgroundColor: '#d32f2f'
+      backgroundColor: '#ffa800'
     },
     duration: 5000
   });
