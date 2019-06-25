@@ -32,7 +32,7 @@ class Loading extends Component {
     isSubmitting: false,
     username: '',
     gender: null,
-    birthMonth: null,
+    birthMonth: 0,
     birthYear: null
   };
 
@@ -58,10 +58,11 @@ class Loading extends Component {
   }
 
   onUsernameSubmit = () => {
-    if(this.state.username && this.state.birthMonth && !this.state.birthYear.equals("Year")) {
+
+    if(this.state.username.length > 0 && this.state.gender != null && this.state.birthMonth > 0 && !isNaN(this.state.birthYear)) {
       this.setState({isSubmitting: true});
 
-      this.props.setUsername(this.props.user, this.state.username)
+      this.props.setUserInfo(this.props.user, this.state.username, this.state.gender, this.state.birthMonth, this.state.birthYear)
       .then(() => this.props.navigation.navigate('Home'));
     } else {
       showErrorToast('Oops, missing some info from you');
@@ -86,7 +87,7 @@ class Loading extends Component {
 
   renderMonths = () => {
     return months.map((month, id) => {
-      return <Picker.Item label={month} key={"month" + id} value={id+1} />;
+      return <Picker.Item label={month} key={"month" + id} value={id} />;
     });
   }
 

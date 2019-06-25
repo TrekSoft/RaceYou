@@ -42,14 +42,19 @@ export const loadUser = (userId) => (dispatch) => {
   });
 };
 
-export const setUsername = (user, name) => (dispatch) => {
+export const setUserInfo = (user, username, gender, birthMonth, birthYear) => (dispatch) => {
+  console.log(birthMonth);
+  const birthday = new Date(birthYear, birthMonth-1);
+
   return new Promise((resolve, reject) => {
     const userRef = firebase.firestore().collection('Users').doc(user.id);
     userRef.set({
-        username: name
+        username,
+        gender,
+        birthday
     }, { merge: true })
     .then(() => {
-      dispatch({ type: UPDATE_USER, payload: { username: name }});
+      dispatch({ type: UPDATE_USER, payload: { username, gender, birthday }});
       resolve();
     })
     .catch((error) => {
