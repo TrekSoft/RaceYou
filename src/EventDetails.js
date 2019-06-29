@@ -66,7 +66,7 @@ class EventDetails extends Component {
     return (
       <Container>
         <Content contentContainerStyle={[styles.page, styles.verticalTop]}>
-          <View style={{ marginTop: 50, marginBottom: 30 }}>
+          <View style={{ marginTop: 40, marginBottom: 30 }}>
             <Text style={{ textAlign: 'center' }}>
               <Text style={styles.header}>Have this screen open to start your </Text>
               <Text style={[styles.header, { fontWeight: 'bold' }]}>{this.event.distance}</Text>

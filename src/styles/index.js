@@ -119,6 +119,20 @@ export const raceHeaderText = {
   color: '#00ff00'
 }
 
+export const tableHeading = {
+  fontWeight: 'bold',
+  flex: 2
+}
+
+export const tableCell = {
+  flex: 2
+}
+
+export const tableRow = {
+  flexDirection: 'row',
+  marginBottom: 5
+}
+
 export const verticalTop = {
   justifyContent: 'flex-start'
 };
