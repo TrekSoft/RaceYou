@@ -79,7 +79,7 @@ class Loading extends Component {
     } else {
       return (
         <Button style={styles.button} onPress={this.onUsernameSubmit}>
-          <Text>Submit</Text>
+          <Text style={styles.buttonText}>Submit</Text>
         </Button>
       );
     }
@@ -123,12 +123,12 @@ class Loading extends Component {
           <View style={{ width: '100%', flexDirection: 'row', marginBottom: 15 }}>
             <TouchableOpacity style={{flex:1, flexDirection: 'row', alignItems: 'center', marginLeft: 10}} onPress={() => this.setState({ gender: 'm' })}>
               <Radio selectedColor="white" style={{ marginRight: 10 }} selected={this.state.gender && this.state.gender === 'm'}/>
-              <Text style={styles.whiteText}>Male</Text>
+              <Text style={styles.radioLabels}>Male</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={{flex:1, flexDirection: 'row', alignItems: 'center'}}  onPress={() => this.setState({ gender: 'f' })}>
               <Radio selectedColor="white" style={{ marginRight: 10 }} selected={this.state.gender && this.state.gender === 'f'} />
-              <Text style={styles.whiteText}>Female</Text>
+              <Text style={styles.radioLabels}>Female</Text>
             </TouchableOpacity>
           </View>
 

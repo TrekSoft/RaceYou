@@ -1,11 +1,12 @@
 const fontWhite = '#fff';
 const backgroundGrey = '#d9d9d9';
+const premiumOrange = '#ffab40';
 
 export const button = {
   width: '100%',
   height: 60,
   maxWidth: 250,
-  backgroundColor: '#8FD819',
+  backgroundColor: '#1485cc',
   borderRadius: 10,
   elevation: 5,
   alignSelf: 'center',
@@ -22,6 +23,11 @@ export const buttonDisabled = {
   backgroundColor: '#19212A'
 };
 
+export const buttonText = {
+  color: '#fff',
+  fontSize: 20
+}
+
 export const countdown = {
   fontSize: 25,
   color: '#00ff00',
@@ -34,6 +40,19 @@ export const header = {
   color: fontWhite,
   marginBottom: 15
 };
+
+export const headerRank = {
+  ...header,
+  marginBottom: 5,
+  fontSize: 20,
+  textAlign: 'center'
+}
+
+export const headerRankContainer = {
+   flex: 1,
+   alignItems: 'center',
+   paddingHorizontal: 10
+}
 
 export const headerCentered = {
   ...header,
@@ -88,6 +107,13 @@ export const pageLight = {
   backgroundColor: backgroundGrey
 }
 
+export const premium2Col = {
+  backgroundColor: premiumOrange,
+  flex: 4,
+  marginHorizontal: 5,
+  alignItems: 'center'
+}
+
 export const raceHeader = {
   width: '100%',
   height: 100,
@@ -122,6 +148,12 @@ export const raceHeaderText = {
 export const tableHeading = {
   fontWeight: 'bold',
   flex: 2
+}
+
+export const radioLabels = {
+  color: fontWhite,
+  fontSize: 20,
+  marginBottom: 3
 }
 
 export const tableCell = {
