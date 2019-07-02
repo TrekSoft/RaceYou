@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { View, ScrollView, Alert, Text } from 'react-native';
 import { Container, Content, Button } from 'native-base';
 import { NavigationActions } from 'react-navigation';
+import firebase from 'react-native-firebase';
 import { connect } from 'react-redux';
 import * as styles from './styles';
 import * as actions from './actions';
@@ -12,6 +13,25 @@ class EventResults extends Component {
   }
 
   state = {
+  }
+
+  getPremium() {
+    const self = this;
+
+    Alert.alert(
+      'Upgrade to Premium',
+      'Congratulations! As one of our first users, we are giving you a year of Premium for free.',
+      [
+        {text: 'Claim free year', onPress: () => {
+          const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+          console.log(self.props);
+          firebase.firestore().collection('Users').doc(self.props.user.id)
+          .update({ premiumExpirationDate })
+          .then(self.props.setUser({ ...self.props.user, premiumExpirationDate }));
+        }},
+      ],
+      {cancelable: false},
+    );
   }
 
   render() {
@@ -50,10 +70,10 @@ class EventResults extends Component {
             <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank/25-30 F</Text></View>
           </View>
 
-          <View style={{ padding: 10, width: '100%', marginBottom: 40 }}>
-            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', zIndex: 10, elevation: 6, borderRadius: 3, opacity: .85, backgroundColor: '#333'}}>
-              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 19, maxWidth: 180, marginTop: 10, marginBottom: 10, textAlign: 'center' }}>Get age, gender, and splits for $1/month</Text>
-              <Button style={[styles.button, { zIndex: 11, elevation: 7, backgroundColor: '#ffab40' }]}><Text>Get Premium</Text></Button>
+          <View style={styles.premiumStatsContainer}>
+            <View style={styles.premiumOverlayContainer}>
+              <Text style={styles.premiumMessage}>Get age, gender, and splits for $1/month</Text>
+              <Button style={styles.premiumButton} onPress={this.getPremium.bind(this)}><Text>Get Premium</Text></Button>
             </View>
 
             <View style={{ flexDirection: 'row', marginBottom: 20 }}>

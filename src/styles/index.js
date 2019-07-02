@@ -1,6 +1,7 @@
 const fontWhite = '#fff';
 const backgroundGrey = '#d9d9d9';
 const premiumOrange = '#ffab40';
+const buttonElevation = 5;
 
 export const button = {
   width: '100%',
@@ -8,7 +9,7 @@ export const button = {
   maxWidth: 250,
   backgroundColor: '#1485cc',
   borderRadius: 10,
-  elevation: 5,
+  elevation: buttonElevation,
   alignSelf: 'center',
   justifyContent: 'center'
 };
@@ -112,6 +113,43 @@ export const premium2Col = {
   flex: 4,
   marginHorizontal: 5,
   alignItems: 'center'
+}
+
+export const premiumButton = {
+  ...button,
+  zIndex: 11,
+  elevation: buttonElevation+2, 
+  backgroundColor: '#ffab40'
+}
+
+export const premiumMessage = {
+  color: '#fff',
+  fontWeight: 'bold',
+  fontSize: 19,
+  maxWidth: 180,
+  marginTop: 10,
+  marginBottom: 10,
+  textAlign: 'center'
+}
+
+export const premiumOverlayContainer = {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  alignItems: 'center',
+  zIndex: 10,
+  elevation: buttonElevation+1,
+  borderRadius: 3,
+  opacity: .85,
+  backgroundColor: '#333'
+}
+
+export const premiumStatsContainer = {
+  padding: 10,
+  width: '100%',
+  marginBottom: 40
 }
 
 export const raceHeader = {
