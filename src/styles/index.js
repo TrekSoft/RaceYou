@@ -44,7 +44,7 @@ export const header = {
 
 export const headerRank = {
   ...header,
-  marginBottom: 5,
+  marginBottom: 10,
   fontSize: 20,
   textAlign: 'center'
 }
@@ -118,7 +118,7 @@ export const premium2Col = {
 export const premiumButton = {
   ...button,
   zIndex: 11,
-  elevation: buttonElevation+2, 
+  elevation: buttonElevation+2,
   backgroundColor: '#ffab40'
 }
 
@@ -147,7 +147,6 @@ export const premiumOverlayContainer = {
 }
 
 export const premiumStatsContainer = {
-  padding: 10,
   width: '100%',
   marginBottom: 40
 }

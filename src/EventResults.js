@@ -20,7 +20,7 @@ class EventResults extends Component {
 
     Alert.alert(
       'Upgrade to Premium',
-      'Congratulations! As one of our first users, we are giving you a year of Premium for free.',
+      'Congratulations! As one of our early users, you\'ve earned a year of Premium for free.',
       [
         {text: 'Claim free year', onPress: () => {
           const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
@@ -31,6 +31,58 @@ class EventResults extends Component {
         }},
       ],
       {cancelable: false},
+    );
+  }
+
+  isPremium() {
+    const expires = this.props.user.premiumExpirationDate;
+    return expires && expires.getTime() > new Date().getTime();
+  }
+
+  renderPremiumCols() {
+    if(this.isPremium()) {
+      return (
+        <>
+          <Text numberOfLines={1} style={styles.tableCell}>M</Text>
+          <Text numberOfLines={1} style={styles.tableCell}>35</Text>
+        </>
+      );
+    } else {
+      return (
+        <View style={styles.premium2Col}><Text>Premium</Text></View>
+      );
+    }
+  }
+
+  renderPremiumRank() {
+    let genderRank, ageRank, genderAgeRank;
+
+    if(this.isPremium()) {
+        genderRank = '2nd',
+        ageRank = '3rd',
+        genderAgeRank = '11th'
+    }
+
+    return (
+      <View style={[styles.premiumStatsContainer, {padding: (this.isPremium() ? 0 : 10)}]}>
+        { !this.isPremium() &&
+
+          <View style={styles.premiumOverlayContainer}>
+            <Text style={styles.premiumMessage}>Get age, gender, and splits for $1/month</Text>
+            <Button style={styles.premiumButton} onPress={this.getPremium.bind(this)}><Text>Get Premium</Text></Button>
+          </View>
+        }
+
+        <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{genderRank}</Text></View></View>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{ageRank}</Text></View></View>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{genderAgeRank}</Text></View></View>
+        </View>
+
+        <Button style={styles.button} onPress={() => alert('View splits')}>
+          <Text style={styles.buttonText}>View Splits</Text>
+        </Button>
+      </View>
     );
   }
 
@@ -55,7 +107,7 @@ class EventResults extends Component {
               <View style={styles.tableRow}>
                 <Text numberOfLines={1} style={styles.tableCell}>1</Text>
                 <Text numberOfLines={1} style={[styles.tableCell, { flex: 3 }]}>ThisIsALongNameTest</Text>
-                <View style={styles.premium2Col}><Text>Premium</Text></View>
+                { this.renderPremiumCols() }
                 <Text numberOfLines={1} style={styles.tableCell}>34:01</Text>
               </View>
             </ScrollView>
@@ -70,22 +122,7 @@ class EventResults extends Component {
             <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank/25-30 F</Text></View>
           </View>
 
-          <View style={styles.premiumStatsContainer}>
-            <View style={styles.premiumOverlayContainer}>
-              <Text style={styles.premiumMessage}>Get age, gender, and splits for $1/month</Text>
-              <Button style={styles.premiumButton} onPress={this.getPremium.bind(this)}><Text>Get Premium</Text></Button>
-            </View>
-
-            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-              <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}></View></View>
-              <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}></View></View>
-              <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}></View></View>
-            </View>
-
-            <Button style={styles.button} onPress={() => console.log('View splits')}>
-              <Text style={styles.buttonText}>View Splits</Text>
-            </Button>
-          </View>
+          { this.renderPremiumRank() }
         </Content>
       </Container>
     );
