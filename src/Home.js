@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
 import 'intl';
 import 'intl/locale-data/jsonp/en';
+import { playSounds } from './utils/SoundPlayer';
 import EventCard from './components/EventCard';
 import * as styles from './styles';
 import * as actions from './actions';
@@ -53,7 +54,8 @@ class Home extends Component {
             if (!isRegistered) {
               this.eventRegister(event);
             } else {
-              this.props.navigation.navigate('EventResults', { eventId: event.id });
+              playSounds(["you_are_currently", "in", "rank_1", "place"]);
+              //this.props.navigation.navigate('Race', { eventId: event.id });
             }
           }}
         />

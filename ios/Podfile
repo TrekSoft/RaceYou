@@ -13,6 +13,8 @@ target 'RaceYou' do
   pod 'Firebase/Database', '~> 5.15.0'
   pod 'Firebase/Auth', '~> 5.15.0'
 
+  pod 'RNSound', :path => '../node_modules/react-native-sound'
+
   target 'RaceYouTests' do
     inherit! :search_paths
     # Pods for testing
