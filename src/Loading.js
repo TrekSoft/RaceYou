@@ -107,7 +107,7 @@ class Loading extends Component {
 
   renderForm() {
     if (this.state.isLoading) {
-      return (<Text style={styles.whiteText}>Loading...</Text>);
+      return (<Text style={[styles.whiteText, { fontSize: 16}]}>Loading...</Text>);
     } else {
       return (
         <View style={{ width: 250, alignItems: 'center', flexDirection: 'column' }}>

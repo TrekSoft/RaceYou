@@ -1,13 +1,18 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Alert, Text } from 'react-native';
-import { Container, Content, Button } from 'native-base';
+import { Container, Content, Button, Fab, Icon } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
+import { playSounds } from './utils/SoundPlayer';
 import { showErrorToast } from './utils/ErrorToast';
 import Runner from './components/Runner';
 import * as styles from './styles';
 import * as actions from './actions';
+
+const RANK_PREFIX = 'rank_';
+const NUM_PREFIX = 'num_';
+const YARDS_PER_MILE = 1760;
 
 class Race extends Component {
   static navigationOptions = {
@@ -26,7 +31,9 @@ class Race extends Component {
     a2: null,
     time: 0,
     place: '--',
-    totalRunners: '--'
+    totalRunners: '--',
+    mute: false,
+    lastMileSoundPlayed: 0
   }
 
   willLeavePage = this.props.navigation.addListener('willBlur', this.clearUpdater.bind(this));
@@ -121,12 +128,55 @@ class Race extends Component {
               this.setState({ a1, a2, b1, b2 });
             }
           }
+
+          if((newDist|0) > this.state.lastMileSoundPlayed && !this.state.mute) {
+            this.setState({ lastMileSoundPlayed: (newDist|0) });
+            this.playUpdate();
+          }
         })
         .catch(() => showErrorToast('Failed to retrieve race data'));;
       },
       error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
+  }
+
+  playUpdate() {
+    let message = [];
+    const place = parseInt(this.state.place);
+    if(!isNaN(place)) {
+      message.push('you_are_currently');
+
+      if(place<100) {
+        message.push('in');
+        message = message.concat(getRankSound(place));
+      } else {
+        message.push('below', 'rank_100');
+      }
+
+      message.push('place');
+    }
+
+    const a1 = this.state.a1;
+    const b1 = this.state.b1;
+
+    if(a1!==null) {
+      const distBehind = a1.distance - this.state.distance;
+      message = message.concat(getNumSound((distBehind*YARDS_PER_MILE)|0));
+      message = message.concat(['yards', 'behind', 'the_next_runner']);
+    }
+
+    if(a1!==null && b1!==null) {
+      message.push('and');
+    }
+
+    if(b1!==null) {
+      const distAhead = this.state.distance - b1.distance;
+      message = message.concat(getNumSound((distAhead*YARDS_PER_MILE)|0));
+      message = message.concat(['yards', 'ahead_of', 'the_previous_runner']);
+    }
+
+    playSounds(message);
   }
 
   renderRunners() {
@@ -176,6 +226,13 @@ class Race extends Component {
           <View style={{flex: 1, width: '100%', flexDirection: 'column'}}>
             {this.renderRunners()}
           </View>
+          <Fab
+            style={{ backgroundColor: '#1485cc' }}
+            position="bottomRight"
+            onPress={() => this.setState({ mute: !this.state.mute })}>
+            {!this.state.mute && <Icon name="volume-up" type="FontAwesome5" />}
+            {this.state.mute && <Icon name="volume-mute" type="FontAwesome5" />}
+          </Fab>
         </Content>
       </Container>
     );
@@ -207,6 +264,43 @@ function distanceInKm(lat1, lon1, lat2, lon2) {
           Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return earthRadiusKm * c;
+}
+
+function getRankSound(place) {
+  // Currently don't support ranks greater than 100
+  if(place>100) {
+    return [];
+  }
+
+  if(place < 20 || place % 10 === 0) {
+    return [RANK_PREFIX + place];
+  }
+  else {
+    return [NUM_PREFIX + (place-place%10), RANK_PREFIX + place%10];
+  }
+}
+
+function getNumSound(num) {
+  // Currently don't support numbers greater than or equal to a billion
+  if(num>1000000000) {
+    return [];
+  }
+
+  if(num > 0 && num < 20) {
+    return [NUM_PREFIX + num];
+  }
+  else if(num < 100){
+    return [NUM_PREFIX + (num-num%10)].concat(getNumSound(num%10));
+  }
+  else if(num < 1000){
+    return [NUM_PREFIX + (num-num%100)/100, 'hundred'].concat(getNumSound(num%100));
+  }
+  else if(num < 1000000){
+    return getNumSound((num-num%1000)/1000).concat(['thousand'].concat(getNumSound(num%1000)));
+  }
+  else {
+    return getNumSound((num-num%1000000)/1000000).concat(['million'].concat(getNumSound(num%1000000)));
+  }
 }
 
 const mapStateToProps = (state) => {
