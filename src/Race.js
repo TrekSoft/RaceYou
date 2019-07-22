@@ -84,17 +84,6 @@ class Race extends Component {
           let newRegistrants = this.state.event.registrants;
           newRegistrants[this.props.user.id].distance = newDist;
 
-          doc.set({registrants: newRegistrants}, { merge: true })
-          .then(() => {
-            this.setState({
-              longitude: newLon,
-              latitude: newLat,
-              altitude: position.coords.altitude,
-              distance: newDist
-            });
-          })
-          .catch(() => showErrorToast('Failed to upload race progress data'));
-
           let runnersArray = [];
           for(key in newRegistrants) {
             runnersArray.push(newRegistrants[key]);
@@ -127,6 +116,26 @@ class Race extends Component {
 
               this.setState({ a1, a2, b1, b2 });
             }
+          }
+
+          if(newDist >= event.distance) {
+            newRegistrants[this.props.user.id].finalPlace = this.state.place;
+            newRegistrants[this.props.user.id].finalTime = this.state.time;
+          }
+
+          doc.set({registrants: newRegistrants}, { merge: true })
+          .then(() => {
+            this.setState({
+              longitude: newLon,
+              latitude: newLat,
+              altitude: position.coords.altitude,
+              distance: newDist
+            });
+          })
+          .catch(() => showErrorToast('Failed to upload race progress data'));
+
+          if(newDist >= event.distance) {
+            this.props.navigation.navigate('EventResults', { eventId: event.id });
           }
 
           if((newDist|0) > this.state.lastMileSoundPlayed && !this.state.mute) {

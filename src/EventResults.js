@@ -15,6 +15,18 @@ class EventResults extends Component {
   state = {
   }
 
+  componentDidMount() {
+    const doc = firebase.firestore().collection('Events').doc(this.props.navigation.getParam('eventId'));
+
+    doc.get()
+    .then((response) => {
+      const event = {...response.data(), id: response.id};
+      const user = event.registrants[this.props.user.id];
+
+      this.setState({event, user});
+    });
+  }
+
   getPremium() {
     const self = this;
 
@@ -86,14 +98,60 @@ class EventResults extends Component {
     );
   }
 
+  renderSummary() {
+    if(!this.state.user) {
+      return;
+    }
+
+    const { user, event } = this.state;
+    const secondsPerMile = user.finalTime / event.distance;
+
+    return (
+      <View style={{ marginTop: 30, marginBottom: 10, alignItems: 'center' }}>
+        <Text style={[styles.header, { marginBottom: 5 }]}>You finished {this.state.user && getNumberWithOrdinal(this.state.user.finalPlace)}</Text>
+        <Text style={styles.header}>{this.state.event.distance} miles @ {formattedSeconds(secondsPerMile)}/mile</Text>
+      </View>
+    );
+  }
+
+  renderResults() {
+    if(!this.state.event) {
+      return;
+    }
+
+    let runnersArray = [];
+    const registrants = this.state.event.registrants;
+
+    for(key in registrants) {
+      if(registrants[key].finalTime) {
+        runnersArray.push(registrants[key]);
+      }
+    }
+
+    runnersArray.sort((a, b) => (a.finalTime - b.finalTime));
+
+    return runnersArray.map(
+      (runner, index) =>
+        <View key={index} style={styles.tableRow}>
+          <Text numberOfLines={1} style={styles.tableCell}>{index+1}</Text>
+          <Text numberOfLines={1} style={[styles.tableCell, { flex: 3 }]}>{runner.username}</Text>
+          { this.isPremium() &&
+            <>
+              <Text numberOfLines={1} style={styles.tableCell}>{runner.gender}</Text>
+              <Text numberOfLines={1} style={styles.tableCell}>{getAge(runner.birthDate)}</Text>
+            </>
+          }
+          { !this.isPremium() && <View style={styles.premium2Col}><Text>Premium</Text></View> }
+          <Text numberOfLines={1} style={styles.tableCell}>{formattedSeconds(runner.finalTime)}</Text>
+        </View>
+    );
+  }
+
   render() {
     return (
       <Container>
         <Content contentContainerStyle={[styles.page, styles.verticalTop]}>
-          <View style={{ marginTop: 30, marginBottom: 10, alignItems: 'center' }}>
-            <Text style={[styles.header, { marginBottom: 5 }]}>You finished 3rd!</Text>
-            <Text style={styles.header}>3.1 miles @ 7:17/mile</Text>
-          </View>
+          {this.renderSummary()}
 
           <View style={[styles.listBox, {marginBottom: 30, padding: 10, flex: 1, flexDirection: 'column' }]}>
             <View style={styles.tableRow}>
@@ -104,12 +162,7 @@ class EventResults extends Component {
               <Text numberOfLines={1} style={styles.tableHeading}>Time</Text>
             </View>
             <ScrollView contentContainerStyle={{ flex: 1 }}>
-              <View style={styles.tableRow}>
-                <Text numberOfLines={1} style={styles.tableCell}>1</Text>
-                <Text numberOfLines={1} style={[styles.tableCell, { flex: 3 }]}>ThisIsALongNameTest</Text>
-                { this.renderPremiumCols() }
-                <Text numberOfLines={1} style={styles.tableCell}>34:01</Text>
-              </View>
+              { this.renderResults() }
             </ScrollView>
             <View style={styles.tableRow}>
               <Text style={{ flex: 1, textAlign: 'center', color: '#777'}}>31 more running...</Text>
@@ -128,6 +181,32 @@ class EventResults extends Component {
     );
   }
 }
+
+function getAge(birthDate) {
+    var today = new Date();
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+function formattedSeconds(seconds) {
+  return zeroPad(Math.floor(seconds/60)) +
+  ":" +
+  zeroPad(Math.floor(seconds) % 60);
+}
+
+function zeroPad(myNumber) {
+  return ("0" + myNumber).slice(-2);
+}
+
+function getNumberWithOrdinal(n) {
+    var s=["th","st","nd","rd"],
+    v=n%100;
+    return n+(s[(v-20)%10]||s[v]||s[0]);
+ }
 
 const mapStateToProps = (state) => {
   return {
