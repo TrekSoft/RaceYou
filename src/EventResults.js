@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Alert, Text } from 'react-native';
-import { Container, Content, Button } from 'native-base';
+import { Container, Content, Button, Toast } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import firebase from 'react-native-firebase';
 import { connect } from 'react-redux';
@@ -70,9 +70,9 @@ class EventResults extends Component {
     let genderRank, ageRank, genderAgeRank;
 
     if(this.isPremium()) {
-        genderRank = '2nd',
-        ageRank = '3rd',
-        genderAgeRank = '11th'
+        genderRank = 'Coming',
+        ageRank = 'soon',
+        genderAgeRank = '...'
     }
 
     return (
@@ -86,12 +86,19 @@ class EventResults extends Component {
         }
 
         <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{genderRank}</Text></View></View>
-          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{ageRank}</Text></View></View>
-          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={styles.countdown}>{genderAgeRank}</Text></View></View>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={[styles.countdown, { fontSize: 18 }]}>{genderRank}</Text></View></View>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={[styles.countdown, { fontSize: 18 }]}>{ageRank}</Text></View></View>
+          <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={[styles.countdown, { fontSize: 18 }]}>{genderAgeRank}</Text></View></View>
         </View>
 
-        <Button style={styles.button} onPress={() => alert('View splits')}>
+        <Button style={styles.button} onPress={() => Toast.show({
+            text: "Coming soon...",
+            style: {
+              backgroundColor: '#000'
+            },
+            duration: 3000
+          })}
+        >
           <Text style={styles.buttonText}>View Splits</Text>
         </Button>
       </View>
@@ -121,15 +128,33 @@ class EventResults extends Component {
 
     let runnersArray = [];
     const registrants = this.state.event.registrants;
+    let otherRunners = 0;
 
     for(key in registrants) {
       if(registrants[key].finalTime) {
         runnersArray.push(registrants[key]);
       }
+      else if(registrants[key].distance > 0) {
+        otherRunners++;
+      }
     }
 
     runnersArray.sort((a, b) => (a.finalTime - b.finalTime));
 
+    return (
+      <>
+        <ScrollView contentContainerStyle={{ flex: 1 }}>
+          { this.renderRunnerList(runnersArray) }
+        </ScrollView>
+
+        <View style={styles.tableRow}>
+          <Text style={{ flex: 1, textAlign: 'center', color: '#777'}}>{otherRunners} more running...</Text>
+        </View>
+      </>
+    );
+  }
+
+  renderRunnerList(runnersArray) {
     return runnersArray.map(
       (runner, index) =>
         <View key={index} style={styles.tableRow}>
@@ -138,7 +163,7 @@ class EventResults extends Component {
           { this.isPremium() &&
             <>
               <Text numberOfLines={1} style={styles.tableCell}>{runner.gender}</Text>
-              <Text numberOfLines={1} style={styles.tableCell}>{getAge(runner.birthDate)}</Text>
+              <Text numberOfLines={1} style={styles.tableCell}>{getAge(runner.birthday)}</Text>
             </>
           }
           { !this.isPremium() && <View style={styles.premium2Col}><Text>Premium</Text></View> }
@@ -161,18 +186,14 @@ class EventResults extends Component {
               <Text numberOfLines={1} style={styles.tableHeading}>Age</Text>
               <Text numberOfLines={1} style={styles.tableHeading}>Time</Text>
             </View>
-            <ScrollView contentContainerStyle={{ flex: 1 }}>
-              { this.renderResults() }
-            </ScrollView>
-            <View style={styles.tableRow}>
-              <Text style={{ flex: 1, textAlign: 'center', color: '#777'}}>31 more running...</Text>
-            </View>
+
+            {this.renderResults()}
           </View>
 
           <View style={{ flexDirection: 'row' }}>
-            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank/Females</Text></View>
-            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank/25-30</Text></View>
-            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank/25-30 F</Text></View>
+            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Sex</Text></View>
+            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Age</Text></View>
+            <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Age + Sex</Text></View>
           </View>
 
           { this.renderPremiumRank() }
@@ -182,11 +203,11 @@ class EventResults extends Component {
   }
 }
 
-function getAge(birthDate) {
+function getAge(birthday) {
     var today = new Date();
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    var age = today.getFullYear() - birthday.getFullYear();
+    var m = today.getMonth() - birthday.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
         age--;
     }
     return age;

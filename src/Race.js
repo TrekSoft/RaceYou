@@ -138,8 +138,8 @@ class Race extends Component {
             this.props.navigation.navigate('EventResults', { eventId: event.id });
           }
 
-          if((newDist|0) > this.state.lastMileSoundPlayed && !this.state.mute) {
-            this.setState({ lastMileSoundPlayed: (newDist|0) });
+          if(((newDist*10)|0) > this.state.lastMileSoundPlayed && !this.state.mute) {
+            this.setState({ lastMileSoundPlayed: ((newDist*10)|0) });
             this.playUpdate();
           }
         })

@@ -37,7 +37,7 @@ export const registerForEvent = (user, event) => (dispatch) => {
       user.events = {};
     }
 
-    event.registrants[user.id] = {id: user.id, username: user.username, distance: 0.0};
+    event.registrants[user.id] = {id: user.id, username: user.username, gender: user.gender, birthday: user.birthday, distance: 0.0};
     user.events[event.id] = {id: event.id, distance: event.distance, time: event.time};
 
     eventRef.update({registrants: event.registrants})
