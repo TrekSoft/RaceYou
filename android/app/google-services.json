@@ -25,46 +25,20 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:507433460074:android:9d4eaf4db364439e",
-        "android_client_info": {
-          "package_name": "com.zealor"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "507433460074-lpg4cce3jr1qlprdd07sdkhcqcnnl8na.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCsHNDjaGpDzrUnp8CkySxQsHPJgZkjIGU"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
+          "other_platform_oauth_client": [
+            {
+              "client_id": "507433460074-lpg4cce3jr1qlprdd07sdkhcqcnnl8na.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "507433460074-50ei0rooqv8ati0qdhnm79guiumu341o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.RaceYou"
+              }
+            }
+          ]
         }
       }
     }

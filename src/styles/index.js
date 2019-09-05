@@ -27,13 +27,19 @@ export const buttonDisabled = {
 export const buttonText = {
   color: '#fff',
   fontSize: 20
-}
+};
 
 export const countdown = {
   fontSize: 25,
   color: '#00ff00',
   marginTop: 10,
   alignSelf: 'center'
+};
+
+export const eventDateDay = {
+  fontSize: 25,
+  color: '#666666',
+  fontWeight: 'bold'
 };
 
 export const header = {

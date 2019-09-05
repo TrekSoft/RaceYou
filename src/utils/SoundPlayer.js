@@ -1,4 +1,6 @@
 import Sound from 'react-native-sound';
+import firebase from 'react-native-firebase';
+import * as errorTypes from '../constants/ErrorTypes';
 
 const soundMap = {
   you_are_currently: require("../../audio/you_are_currently.wav"),
@@ -80,7 +82,7 @@ const playSoundsHelper = function(soundArr, index) {
   if(index<soundArr.length) {
     const sound = new Sound(soundMap[soundArr[index]], (error) => {
        if (error) {
-         console.log(error);
+        firebase.crashlytics().recordError(errorTypes.SOUND_ERROR, error);
          return;
        }
 

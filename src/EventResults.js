@@ -36,7 +36,6 @@ class EventResults extends Component {
       [
         {text: 'Claim free year', onPress: () => {
           const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-          console.log(self.props);
           firebase.firestore().collection('Users').doc(self.props.user.id)
           .update({ premiumExpirationDate })
           .then(self.props.setUser({ ...self.props.user, premiumExpirationDate }));
@@ -48,7 +47,7 @@ class EventResults extends Component {
 
   isPremium() {
     const expires = this.props.user.premiumExpirationDate;
-    return expires && expires.getTime() > new Date().getTime();
+    return expires && new Date(expires.seconds * 1000).getTime() > new Date().getTime();
   }
 
   renderPremiumCols() {
@@ -203,14 +202,15 @@ class EventResults extends Component {
   }
 }
 
-function getAge(birthday) {
-    var today = new Date();
-    var age = today.getFullYear() - birthday.getFullYear();
-    var m = today.getMonth() - birthday.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
-        age--;
-    }
-    return age;
+function getAge(birthTimestamp) {
+  var today = new Date();
+  var birthday = new Date(birthTimestamp.seconds * 1000);
+  var age = today.getFullYear() - birthday.getFullYear();
+  var m = today.getMonth() - birthday.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthday.getDate())) {
+    age--;
+  }
+  return age;
 }
 
 function formattedSeconds(seconds) {

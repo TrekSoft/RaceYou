@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
-import { View, ScrollView, Alert, Text } from 'react-native';
-import { Container, Content, Button, Fab, Icon } from 'native-base';
-import { NavigationActions } from 'react-navigation';
+import { View, Alert, Text } from 'react-native';
+import { Container, Content, Fab, Icon } from 'native-base';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
+import BackgroundGeolocation from 'react-native-background-geolocation';
 import { playSounds } from './utils/SoundPlayer';
 import { showErrorToast } from './utils/ErrorToast';
 import Runner from './components/Runner';
 import * as styles from './styles';
 import * as actions from './actions';
+import * as errorTypes from './constants/ErrorTypes';
 
 const RANK_PREFIX = 'rank_';
 const NUM_PREFIX = 'num_';
@@ -16,8 +17,8 @@ const YARDS_PER_MILE = 1760;
 
 class Race extends Component {
   static navigationOptions = {
-      title: 'Live Race'
-  }
+    title: 'Live Race'
+  };
 
   state = {
     event: null,
@@ -34,96 +35,127 @@ class Race extends Component {
     totalRunners: '--',
     mute: false,
     lastMileSoundPlayed: 0
-  }
-
-  willLeavePage = this.props.navigation.addListener('willBlur', this.clearUpdater.bind(this));
+  };
 
   componentDidMount() {
-    this.updateReadout();
-    this.readoutUpdater = setInterval(this.updateReadout.bind(this), 1000);
+    let self = this;
+
+    BackgroundGeolocation.onLocation(
+      location => self.updateReadout(location),
+      error =>
+        firebase
+          .crashlytics()
+          .recordError(errorTypes.GPS_ERROR, this.props.user.id + ':' + error)
+    );
+
+    BackgroundGeolocation.ready(
+      {
+        reset: true,
+        desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+        distanceFilter: 1,
+        debug: false
+      },
+      state => {
+        if (!state.enabled) {
+          BackgroundGeolocation.start();
+        }
+      }
+    );
   }
 
-  clearUpdater() {
-    clearInterval(this.readoutUpdater);
+  componentWillUnmount() {
+    BackgroundGeolocation.removeListeners();
   }
 
-  updateReadout() {
-    // Update location
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        // Get latest copy of the event before updating it
-        const doc = firebase.firestore().collection('Events').doc(this.props.navigation.getParam('eventId'));
+  updateReadout(position) {
+    // Get latest copy of the event before updating it
+    const doc = firebase
+      .firestore()
+      .collection('Events')
+      .doc(this.props.navigation.getParam('eventId'));
 
-        doc.get()
-        .then((response) => {
-          const event = {...response.data(), id: response.id};
-          this.setState({event});
+    doc
+      .get()
+      .then(response => {
+        const event = {
+          ...response.data(),
+          id: response.id,
+          time: new Date(response.data().time.seconds * 1000)
+        };
+        this.setState({ event });
 
-          // Update time
-          const now = new Date();
-          this.setState({ time: (now.getTime() - this.state.event.time.getTime()) / 1000 });
+        // Update time
+        const now = new Date();
 
-          const user = event.registrants[this.props.user.id];
+        // Bug with this.state.event.time
+        this.setState({
+          time: (now.getTime() - this.state.event.time.getTime()) / 1000
+        });
 
-          if(user.distance) {
-            this.setState({distance: parseFloat(user.distance)});
-          }
+        const user = event.registrants[this.props.user.id];
 
-          const oldLat = this.state.latitude;
-          const oldLon = this.state.longitude;
-          const newLat = position.coords.latitude;
-          const newLon = position.coords.longitude;
-          let newDist;
+        if (user.distance) {
+          this.setState({ distance: parseFloat(user.distance) });
+        }
 
-          if(oldLat != null && oldLon != null) {
-            newDist = parseFloat(this.state.distance) + parseFloat(distanceInMiles(oldLat, oldLon, newLat, newLon));
-          } else {
-            newDist = this.state.distance;
-          }
+        const oldLat = this.state.latitude;
+        const oldLon = this.state.longitude;
+        const newLat = position.coords.latitude;
+        const newLon = position.coords.longitude;
+        let newDist;
 
-          let newRegistrants = this.state.event.registrants;
-          newRegistrants[this.props.user.id].distance = newDist;
+        if (oldLat != null && oldLon != null) {
+          newDist =
+            parseFloat(this.state.distance) +
+            parseFloat(distanceInMiles(oldLat, oldLon, newLat, newLon));
+        } else {
+          newDist = this.state.distance;
+        }
 
-          let runnersArray = [];
-          for(key in newRegistrants) {
-            runnersArray.push(newRegistrants[key]);
-          }
+        let newRegistrants = this.state.event.registrants;
+        newRegistrants[this.props.user.id].distance = newDist;
 
-          runnersArray.sort((a, b) => (b.distance - a.distance));
+        let runnersArray = [];
+        for (let key in newRegistrants) {
+          runnersArray.push(newRegistrants[key]);
+        }
 
-          for(let i=0; i<runnersArray.length; i++) {
-            if(runnersArray[i].id == user.id) {
-              this.setState({ place: i+1, totalRunners: runnersArray.length });
+        runnersArray.sort((a, b) => b.distance - a.distance);
 
-              let a1, a2, b1, b2;
-              a1 = a2 = b1 = b2 = null;
+        for (let i = 0; i < runnersArray.length; i++) {
+          if (runnersArray[i].id === user.id) {
+            this.setState({ place: i + 1, totalRunners: runnersArray.length });
 
-              if(i>=2) {
-                a2 = runnersArray[i-2];
-              }
+            let a1, a2, b1, b2;
+            a1 = a2 = b1 = b2 = null;
 
-              if(i>=1) {
-                a1 = runnersArray[i-1];
-              }
-
-              if(i<runnersArray.length-2) {
-                b2 = runnersArray[i+2];
-              }
-
-              if(i<runnersArray.length-1) {
-                b1 = runnersArray[i+1];
-              }
-
-              this.setState({ a1, a2, b1, b2 });
+            if (i >= 2) {
+              a2 = runnersArray[i - 2];
             }
-          }
 
-          if(newDist >= event.distance) {
-            newRegistrants[this.props.user.id].finalPlace = this.state.place;
-            newRegistrants[this.props.user.id].finalTime = this.state.time;
-          }
+            if (i >= 1) {
+              a1 = runnersArray[i - 1];
+            }
 
-          doc.set({registrants: newRegistrants}, { merge: true })
+            if (i < runnersArray.length - 2) {
+              b2 = runnersArray[i + 2];
+            }
+
+            if (i < runnersArray.length - 1) {
+              b1 = runnersArray[i + 1];
+            }
+
+            this.setState({ a1, a2, b1, b2 });
+          }
+        }
+
+        if (newDist >= event.distance) {
+          newRegistrants[this.props.user.id].finalPlace = this.state.place;
+          newRegistrants[this.props.user.id].finalTime = this.state.time;
+        }
+
+        doc
+          .set({ registrants: newRegistrants }, { merge: true })
           .then(() => {
             this.setState({
               longitude: newLon,
@@ -134,29 +166,28 @@ class Race extends Component {
           })
           .catch(() => showErrorToast('Failed to upload race progress data'));
 
-          if(newDist >= event.distance) {
-            this.props.navigation.navigate('EventResults', { eventId: event.id });
-          }
+        if (newDist >= event.distance) {
+          this.props.navigation.navigate('EventResults', { eventId: event.id });
+        }
 
-          if(((newDist*10)|0) > this.state.lastMileSoundPlayed && !this.state.mute) {
-            this.setState({ lastMileSoundPlayed: ((newDist*10)|0) });
-            this.playUpdate();
-          }
-        })
-        .catch(() => showErrorToast('Failed to retrieve race data'));;
-      },
-      error => Alert.alert(error.message),
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-    );
+        if (
+          ((newDist * 10) | 0) > this.state.lastMileSoundPlayed &&
+          !this.state.mute
+        ) {
+          this.setState({ lastMileSoundPlayed: (newDist * 10) | 0 });
+          this.playUpdate();
+        }
+      })
+      .catch(() => showErrorToast('Failed to retrieve race data'));
   }
 
   playUpdate() {
     let message = [];
     const place = parseInt(this.state.place);
-    if(!isNaN(place)) {
+    if (!isNaN(place)) {
       message.push('you_are_currently');
 
-      if(place<100) {
+      if (place<100) {
         message.push('in');
         message = message.concat(getRankSound(place));
       } else {

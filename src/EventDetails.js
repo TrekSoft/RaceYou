@@ -3,35 +3,49 @@ import { View, ScrollView, Alert } from 'react-native';
 import { Container, Content, Button, Text } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
+import BackgroundGeolocation from 'react-native-background-geolocation';
 import * as styles from './styles';
 import * as actions from './actions';
 
 class EventDetails extends Component {
   static navigationOptions = {
-      title: 'Event Details'
-  }
+    title: 'Event Details'
+  };
 
   state = {
-    timeLeft: null
-  }
+    timeLeft: null,
+    event: this.props.events[this.props.navigation.getParam('eventId')]
+  };
 
   willLeavePage = this.props.navigation.addListener('willBlur', this.clearCountdown.bind(this));
 
-  componentWillMount() {
-    this.event = this.props.events[this.props.navigation.getParam('eventId')];
-    // const currentTime = new Date();
-    // this.event.time = new Date(currentTime.getTime() + 5000);
+  componentDidMount() {
+    //const currentTime = new Date();
+    //this.state.event.time = new Date(currentTime.getTime() + 5000);
     this.updateCountdown();
     this.countdown = setInterval(this.updateCountdown.bind(this), 1000);
+    BackgroundGeolocation.ready(
+      {
+        reset: true,
+        desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
+        distanceFilter: 1,
+        debug: false
+      },
+      state => {
+        if (!state.enabled) {
+          BackgroundGeolocation.start();
+        }
+      }
+    );
   }
 
   updateCountdown() {
     const currentDate = new Date();
-    const startDate = this.event.time;
+    const startDate = this.state.event.time;
     const timeLeft = Math.floor((startDate.getTime() - currentDate.getTime()) / 1000);
 
     if(timeLeft <= 0) {
-      this.props.navigation.navigate('Race', { eventId: this.event.id });
+      this.props.navigation.navigate('Race', { eventId: this.state.event.id });
     }
 
     this.setState({ timeLeft });
@@ -48,7 +62,7 @@ class EventDetails extends Component {
       [
         {text: 'No, keep it', style: 'cancel'},
         {text: 'Yeah, I\'m sure', onPress: () =>
-          this.props.cancelEvent(this.props.user, this.event)
+          this.props.cancelEvent(this.props.user, this.state.event)
             .then(() => this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0))
         },
       ],
@@ -57,7 +71,7 @@ class EventDetails extends Component {
   }
 
   renderParticipants() {
-    return Object.values(this.event.registrants).map((registrant, index) =>
+    return Object.values(this.state.event.registrants).map((registrant, index) =>
       <Text key={index}>{registrant.username}</Text>
     );
   }
@@ -69,7 +83,7 @@ class EventDetails extends Component {
           <View style={{ marginTop: 40, marginBottom: 30 }}>
             <Text style={{ textAlign: 'center' }}>
               <Text style={styles.header}>Have this screen open to start your </Text>
-              <Text style={[styles.header, { fontWeight: 'bold' }]}>{this.event.distance}</Text>
+              <Text style={[styles.header, { fontWeight: 'bold' }]}>{this.state.event.distance}</Text>
               <Text style={styles.header}> mile race in:</Text>
             </Text>
           </View>

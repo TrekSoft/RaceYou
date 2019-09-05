@@ -41,7 +41,7 @@ export const registerForEvent = (user, event) => (dispatch) => {
     user.events[event.id] = {id: event.id, distance: event.distance, time: event.time};
 
     eventRef.update({registrants: event.registrants})
-    .then(() => {
+    .then((data) => {
       dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
 
       userRef.update({events: user.events})
@@ -79,7 +79,7 @@ function getEvent(doc) {
 
   return {
     id,
-    time,
+    time: new Date(time.seconds * 1000),
     distance,
     registrants
   };
