@@ -45,6 +45,7 @@ const soundMap = {
   rank_80: require("../../audio/rank_80.wav"),
   rank_90: require("../../audio/rank_90.wav"),
   rank_100: require("../../audio/rank_100.wav"),
+  num_0: require("../../audio/num_0.wav"),
   num_1: require("../../audio/num_1.wav"),
   num_2: require("../../audio/num_2.wav"),
   num_3: require("../../audio/num_3.wav"),

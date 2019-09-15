@@ -1,30 +1,45 @@
 import firebase from 'react-native-firebase';
+import moment from 'moment';
 import {
   SET_EVENTS,
   UPDATE_EVENT,
   UPDATE_USER
 } from './types';
 
-export const loadEvents = () => (dispatch) => {
+export const loadEvents = () => dispatch => {
   return new Promise((resolve, reject) => {
-    firebase.firestore().collection('Events').where("time", ">", new Date()).orderBy("time").limit(20).get()
-    .then((response) => {
+    firebase
+      .firestore()
+      .collection('Events')
+      .where(
+        'time',
+        '>',
+        moment(new Date())
+          .subtract(2, 'hours')
+          .toDate()
+      )
+      .orderBy('time')
+      .limit(20)
+      .get()
+      .then(response => {
         let events = {};
 
-        response.forEach((doc) => {
+        response.forEach(doc => {
           events[doc.id] = getEvent(doc);
         });
 
         dispatch({ type: SET_EVENTS, payload: events });
         resolve();
-    })
-    .catch((error) => {
-      reject(error.message);
-    });
+      })
+      .catch((error) => {
+        reject(error.message);
+      });
   });
 };
 
 export const registerForEvent = (user, event) => (dispatch) => {
+  firebase.analytics().logEvent('eventRegistration', { distance: event.distance, time: event.time, user: user.id, event: event.id });
+
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
     const userRef = firebase.firestore().collection('Users').doc(user.id);
@@ -53,6 +68,8 @@ export const registerForEvent = (user, event) => (dispatch) => {
 };
 
 export const cancelEvent = (user, event) => (dispatch) => {
+  firebase.analytics().logEvent('eventCancelation', { distance: event.distance, time: event.time, user: user.id, event: event.id });
+
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
     const userRef = firebase.firestore().collection('Users').doc(user.id);

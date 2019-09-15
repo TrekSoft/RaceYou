@@ -20,7 +20,11 @@ class EventCard extends Component {
             </View>
             <View style={{ flexDirection: 'column', marginLeft: 15, height: 65, justifyContent: 'center' }}>
               <Text style={{ fontWeight: 'bold' }}>{this.props.time}</Text>
-              <Text>{this.props.numRegistered} registered</Text>
+              {this.props.inProgress ? (
+                <Text style={{ color: 'red'}}>In progress...</Text>
+              ) : (
+                <Text>{this.props.numRegistered} registered</Text>
+              )}
             </View>
           </Body>
         </CardItem>

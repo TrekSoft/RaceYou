@@ -18,7 +18,9 @@ export const loadUser = (userId) => (dispatch) => {
         const user = {
           id: userId,
           ...response.data()
-        }
+        };
+
+        firebase.analytics().setUserId(userId);
 
         dispatch({ type: SET_USER, payload: user });
         resolve(user);
@@ -43,6 +45,7 @@ export const loadUser = (userId) => (dispatch) => {
 
 export const setUserInfo = (user, username, gender, birthMonth, birthYear) => (dispatch) => {
   const birthday = new Date(birthYear, birthMonth-1);
+  firebase.analytics().logEvent('sign_up', {method: 'quickstartApp'});
 
   return new Promise((resolve, reject) => {
     const userRef = firebase.firestore().collection('Users').doc(user.id);

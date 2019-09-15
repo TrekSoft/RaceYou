@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, TouchableOpacity } from 'react-native';
+import { NavigationActions } from 'react-navigation';
 import {
   Container,
   Content,
@@ -48,6 +49,8 @@ class Loading extends Component {
   };
 
   componentDidMount() {
+    firebase.analytics().setCurrentScreen('Loading', 'RaceYou');
+
     firebase
       .auth()
       .signInAnonymously()
@@ -57,7 +60,10 @@ class Loading extends Component {
           .loadUser(user.uid)
           .then(freshUser => {
             if (freshUser.username) {
-              this.props.navigation.navigate('Home');
+              this.props.navigation.reset(
+                [NavigationActions.navigate({ routeName: 'Home' })],
+                0
+              );
             } else {
               this.setState({ isLoading: false });
             }

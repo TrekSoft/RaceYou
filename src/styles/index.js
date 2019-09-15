@@ -1,4 +1,4 @@
-const fontWhite = '#fff';
+const fontWhite = '#eee';
 const backgroundGrey = '#d9d9d9';
 const premiumOrange = '#ffab40';
 const buttonElevation = 5;
@@ -89,7 +89,7 @@ export const listBoxDark = {
 }
 
 export const listHeaderContainer = {
-  marginTop: 50,
+  marginTop: 40,
   width: '100%',
   justifyContent: 'flex-start',
   flexDirection: 'row'

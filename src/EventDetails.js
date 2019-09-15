@@ -4,6 +4,7 @@ import { Container, Content, Button, Text } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import BackgroundGeolocation from 'react-native-background-geolocation';
+import firebase from 'react-native-firebase';
 import * as styles from './styles';
 import * as actions from './actions';
 
@@ -17,11 +18,8 @@ class EventDetails extends Component {
     event: this.props.events[this.props.navigation.getParam('eventId')]
   };
 
-  willLeavePage = this.props.navigation.addListener('willBlur', this.clearCountdown.bind(this));
-
   componentDidMount() {
-    //const currentTime = new Date();
-    //this.state.event.time = new Date(currentTime.getTime() + 5000);
+    firebase.analytics().setCurrentScreen('EventDetails', 'RaceYou');
     this.updateCountdown();
     this.countdown = setInterval(this.updateCountdown.bind(this), 1000);
     BackgroundGeolocation.ready(
@@ -39,20 +37,21 @@ class EventDetails extends Component {
     );
   }
 
+  componentWillUnmount() {
+    clearInterval(this.countdown);
+  }
+
   updateCountdown() {
     const currentDate = new Date();
     const startDate = this.state.event.time;
     const timeLeft = Math.floor((startDate.getTime() - currentDate.getTime()) / 1000);
 
     if(timeLeft <= 0) {
+      firebase.analytics().logEvent('raceStarted', { distance: this.state.event.distance });
       this.props.navigation.navigate('Race', { eventId: this.state.event.id });
     }
 
     this.setState({ timeLeft });
-  }
-
-  clearCountdown() {
-    clearInterval(this.countdown);
   }
 
   cancelEvent() {

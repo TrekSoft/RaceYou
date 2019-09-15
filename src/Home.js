@@ -3,6 +3,7 @@ import { View, ScrollView, Alert, Linking } from 'react-native';
 import { Container, Content, Text, Button } from 'native-base';
 import { connect } from 'react-redux';
 import moment from 'moment';
+import firebase from 'react-native-firebase';
 import EventCard from './components/EventCard';
 import * as styles from './styles';
 import * as actions from './actions';
@@ -17,6 +18,7 @@ class Home extends Component {
   };
 
   componentDidMount() {
+    firebase.analytics().setCurrentScreen('Home', 'RaceYou');
     this.props.loadEvents().then(() => this.setState({ loadingEvents: false }));
   }
 
@@ -49,11 +51,16 @@ class Home extends Component {
         distance={Number.parseFloat(event.distance).toFixed(1)}
         time={moment(event.time).format('LT')}
         numRegistered={Object.keys(event.registrants).length}
+        inProgress={moment(event.time).isSameOrBefore(new Date())}
         callback={() => {
           if (!isRegistered) {
             this.eventRegister(event);
+          } else if (moment(event.time).isSameOrBefore(new Date())) {
+            this.props.navigation.navigate('Race', {
+              eventId: event.id
+            });
           } else {
-            this.props.navigation.navigate('EventResults', {
+            this.props.navigation.navigate('EventDetails', {
               eventId: event.id
             });
           }
@@ -163,7 +170,7 @@ const mapStateToProps = state => {
       }
 
       userEvents[date].push(event);
-    } else {
+    } else if (moment(event.time).isAfter(new Date())) {
       if (!availableEvents[date]) {
         availableEvents[date] = [];
       }

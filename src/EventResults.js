@@ -1,40 +1,62 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Alert, Text } from 'react-native';
-import { Container, Content, Button, Toast } from 'native-base';
-import { NavigationActions } from 'react-navigation';
+import { Container, Content, Button, Toast, Icon } from 'native-base';
 import firebase from 'react-native-firebase';
 import { connect } from 'react-redux';
 import * as styles from './styles';
 import * as actions from './actions';
 
 class EventResults extends Component {
-  static navigationOptions = {
-      title: 'Event Results'
-  }
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: 'Event Results',
+      headerLeft: (
+        <Button dark transparent onPress={() => navigation.navigate('Home')}>
+          <Icon name="home" type="FontAwesome5" />
+        </Button>
+      )
+    };
+  };
 
   state = {
-  }
+    event: null,
+    user: null
+  };
 
   componentDidMount() {
-    const doc = firebase.firestore().collection('Events').doc(this.props.navigation.getParam('eventId'));
+    firebase.analytics().setCurrentScreen('EventResults', 'RaceYou');
+    this.updateResults();
+    this.resultsUpdater = setInterval(this.updateResults.bind(this), 1000);
+  }
 
-    doc.get()
-    .then((response) => {
-      const event = {...response.data(), id: response.id};
+  componentWillUnmount() {
+    clearInterval(this.resultsUpdater);
+  }
+
+  updateResults() {
+    const doc = firebase
+      .firestore()
+      .collection('Events')
+      .doc(this.props.navigation.getParam('eventId'));
+
+    doc.get().then(response => {
+      const event = { ...response.data(), id: response.id };
       const user = event.registrants[this.props.user.id];
 
-      this.setState({event, user});
+      this.setState({ event, user });
     });
   }
 
   getPremium() {
     const self = this;
+    firebase.analytics().logEvent('getPremiumOpened', { distance: this.state.event.distance });
 
     Alert.alert(
       'Upgrade to Premium',
       'Congratulations! As one of our early users, you\'ve earned a year of Premium for free.',
       [
         {text: 'Claim free year', onPress: () => {
+          firebase.analytics().logEvent('getPremiumFreeTrialClaimed', { distance: this.state.event.distance });
           const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
           firebase.firestore().collection('Users').doc(self.props.user.id)
           .update({ premiumExpirationDate })

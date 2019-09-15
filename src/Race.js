@@ -39,6 +39,7 @@ class Race extends Component {
 
   componentDidMount() {
     let self = this;
+    firebase.analytics().setCurrentScreen('Race', 'RaceYou');
 
     BackgroundGeolocation.onLocation(
       location => self.updateReadout(location),
@@ -53,7 +54,8 @@ class Race extends Component {
         reset: true,
         desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
         distanceFilter: 1,
-        debug: false
+        debug: false,
+        disableStopDetection: true
       },
       state => {
         if (!state.enabled) {
@@ -65,6 +67,7 @@ class Race extends Component {
 
   componentWillUnmount() {
     BackgroundGeolocation.removeListeners();
+    BackgroundGeolocation.stop();
   }
 
   updateReadout(position) {
@@ -152,6 +155,7 @@ class Race extends Component {
         if (newDist >= event.distance) {
           newRegistrants[this.props.user.id].finalPlace = this.state.place;
           newRegistrants[this.props.user.id].finalTime = this.state.time;
+          firebase.analytics().logEvent('raceFinished', { distance: event.distance });
         }
 
         doc
@@ -170,11 +174,15 @@ class Race extends Component {
           this.props.navigation.navigate('EventResults', { eventId: event.id });
         }
 
+        const announcementsPerMile = 4 / event.distance;
+
         if (
-          ((newDist * 10) | 0) > this.state.lastMileSoundPlayed &&
+          ((newDist * announcementsPerMile) | 0) > this.state.lastMileSoundPlayed &&
           !this.state.mute
         ) {
-          this.setState({ lastMileSoundPlayed: (newDist * 10) | 0 });
+          this.setState({
+            lastMileSoundPlayed: (newDist * announcementsPerMile) | 0
+          });
           this.playUpdate();
         }
       })
@@ -187,7 +195,7 @@ class Race extends Component {
     if (!isNaN(place)) {
       message.push('you_are_currently');
 
-      if (place<100) {
+      if (place < 100) {
         message.push('in');
         message = message.concat(getRankSound(place));
       } else {
@@ -215,7 +223,6 @@ class Race extends Component {
       message = message.concat(getNumSound((distAhead*YARDS_PER_MILE)|0));
       message = message.concat(['yards', 'ahead_of', 'the_previous_runner']);
     }
-
     playSounds(message);
   }
 
@@ -245,7 +252,9 @@ class Race extends Component {
         <Content contentContainerStyle={[styles.pageLight, styles.verticalTop, {paddingHorizontal: 0}]}>
           <View style={styles.raceHeader}>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>{this.state.distance.toFixed(2)}</Text>
+              <Text style={styles.raceHeaderText}>
+                {truncateDecimals(this.state.distance, 2)}
+              </Text>
               <Text style={styles.raceHeaderSubtext}>miles</Text>
             </View>
             <View style={styles.raceHeaderDivider}></View>
@@ -277,6 +286,15 @@ class Race extends Component {
       </Container>
     );
   }
+}
+
+function truncateDecimals(num, digits) {
+  var numS = num.toString(),
+    decPos = numS.indexOf('.'),
+    substrLength = decPos === -1 ? numS.length : 1 + decPos + digits,
+    trimmedResult = numS.substr(0, substrLength);
+
+  return isNaN(trimmedResult) ? '0' : trimmedResult;
 }
 
 function zeroPad(myNumber) {
@@ -326,7 +344,7 @@ function getNumSound(num) {
     return [];
   }
 
-  if(num > 0 && num < 20) {
+  if(num >= 0 && num < 20) {
     return [NUM_PREFIX + num];
   }
   else if(num < 100){
