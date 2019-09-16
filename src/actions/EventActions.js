@@ -38,7 +38,7 @@ export const loadEvents = () => dispatch => {
 };
 
 export const registerForEvent = (user, event) => (dispatch) => {
-  firebase.analytics().logEvent('eventRegistration', { distance: event.distance, time: event.time, user: user.id, event: event.id });
+  firebase.analytics().logEvent('event_registration', { distance: event.distance, time: event.time, user: user.id, event: event.id });
 
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);
@@ -68,7 +68,7 @@ export const registerForEvent = (user, event) => (dispatch) => {
 };
 
 export const cancelEvent = (user, event) => (dispatch) => {
-  firebase.analytics().logEvent('eventCancelation', { distance: event.distance, time: event.time, user: user.id, event: event.id });
+  firebase.analytics().logEvent('event_cancelation', { distance: event.distance, time: event.time, user: user.id, event: event.id });
 
   return new Promise((resolve, reject) => {
     const eventRef = firebase.firestore().collection('Events').doc(event.id);

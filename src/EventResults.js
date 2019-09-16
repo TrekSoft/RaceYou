@@ -49,18 +49,17 @@ class EventResults extends Component {
 
   getPremium() {
     const self = this;
-    firebase.analytics().logEvent('getPremiumOpened', { distance: this.state.event.distance });
+    firebase.analytics().logEvent('get_premium', { distance: this.state.event.distance });
 
     Alert.alert(
       'Upgrade to Premium',
       'Congratulations! As one of our early users, you\'ve earned a year of Premium for free.',
       [
         {text: 'Claim free year', onPress: () => {
-          firebase.analytics().logEvent('getPremiumFreeTrialClaimed', { distance: this.state.event.distance });
           const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
           firebase.firestore().collection('Users').doc(self.props.user.id)
           .update({ premiumExpirationDate })
-          .then(self.props.setUser({ ...self.props.user, premiumExpirationDate }));
+          .then(self.props.setUser({ ...self.props.user, premiumExpirationDate: {seconds: premiumExpirationDate.getTime()/1000}}));
         }},
       ],
       {cancelable: false},

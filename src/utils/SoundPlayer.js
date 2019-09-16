@@ -16,6 +16,7 @@ const soundMap = {
   the_next_runner: require("../../audio/the_next_runner.wav"),
   the_previous_runner: require("../../audio/the_previous_runner.wav"),
   thousand: require("../../audio/thousand.wav"),
+  race_completed: require("../../audio/race_completed.wav"),
   yards: require("../../audio/yards.wav"),
   rank_1: require("../../audio/rank_1.wav"),
   rank_2: require("../../audio/rank_2.wav"),

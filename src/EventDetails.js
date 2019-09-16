@@ -37,7 +37,12 @@ class EventDetails extends Component {
     );
   }
 
-  componentWillUnmount() {
+  willLeavePage = this.props.navigation.addListener(
+    'willBlur',
+    this.clearUpdater.bind(this)
+  );
+
+  clearUpdater() {
     clearInterval(this.countdown);
   }
 
@@ -47,7 +52,7 @@ class EventDetails extends Component {
     const timeLeft = Math.floor((startDate.getTime() - currentDate.getTime()) / 1000);
 
     if(timeLeft <= 0) {
-      firebase.analytics().logEvent('raceStarted', { distance: this.state.event.distance });
+      firebase.analytics().logEvent('race_started', { distance: this.state.event.distance });
       this.props.navigation.navigate('Race', { eventId: this.state.event.id });
     }
 

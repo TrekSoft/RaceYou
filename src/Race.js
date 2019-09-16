@@ -3,6 +3,7 @@ import { View, Alert, Text } from 'react-native';
 import { Container, Content, Fab, Icon } from 'native-base';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
+import { NavigationActions } from 'react-navigation';
 import BackgroundGeolocation from 'react-native-background-geolocation';
 import { playSounds } from './utils/SoundPlayer';
 import { showErrorToast } from './utils/ErrorToast';
@@ -34,8 +35,13 @@ class Race extends Component {
     place: '--',
     totalRunners: '--',
     mute: false,
-    lastMileSoundPlayed: 0
+    lastMileSoundPlayed: null
   };
+
+  willLeavePage = this.props.navigation.addListener(
+    'willBlur',
+    this.clearUpdater.bind(this)
+  );
 
   componentDidMount() {
     let self = this;
@@ -46,7 +52,7 @@ class Race extends Component {
       error =>
         firebase
           .crashlytics()
-          .recordError(errorTypes.GPS_ERROR, this.props.user.id + ':' + error)
+          .recordError(errorTypes.GPS_ERROR, this.props.user.id)
     );
 
     BackgroundGeolocation.ready(
@@ -65,7 +71,7 @@ class Race extends Component {
     );
   }
 
-  componentWillUnmount() {
+  clearUpdater() {
     BackgroundGeolocation.removeListeners();
     BackgroundGeolocation.stop();
   }
@@ -152,10 +158,11 @@ class Race extends Component {
           }
         }
 
-        if (newDist >= event.distance) {
+        if (newDist >= event.distance && !newRegistrants[this.props.user.id].finalPlace) {
+          playSounds(['race_completed']);
           newRegistrants[this.props.user.id].finalPlace = this.state.place;
           newRegistrants[this.props.user.id].finalTime = this.state.time;
-          firebase.analytics().logEvent('raceFinished', { distance: event.distance });
+          firebase.analytics().logEvent('race_finished', { distance: event.distance });
         }
 
         doc
@@ -171,14 +178,27 @@ class Race extends Component {
           .catch(() => showErrorToast('Failed to upload race progress data'));
 
         if (newDist >= event.distance) {
-          this.props.navigation.navigate('EventResults', { eventId: event.id });
+          this.props.navigation.reset(
+            [
+              NavigationActions.navigate({
+                routeName: 'EventResults',
+                params: { eventId: event.id }
+              })
+            ],
+            0
+          );
         }
 
         const announcementsPerMile = 4 / event.distance;
 
-        if (
+        if (this.state.lastMileSoundPlayed === null) {
+          this.setState({
+            lastMileSoundPlayed: (newDist * announcementsPerMile) | 0
+          });
+        } else if (
           ((newDist * announcementsPerMile) | 0) > this.state.lastMileSoundPlayed &&
-          !this.state.mute
+          !this.state.mute &&
+          newDist < event.distance - 0.1
         ) {
           this.setState({
             lastMileSoundPlayed: (newDist * announcementsPerMile) | 0

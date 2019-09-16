@@ -4,9 +4,10 @@ import {
   UPDATE_USER
 } from './types';
 
-export const setUser = (user) => (dispatch) => {
-  dispatch({ type: SET_USER, payload: user });
-};
+export const setUser = (user) => ({
+  type: SET_USER,
+  payload: user
+});
 
 export const loadUser = (userId) => (dispatch) => {
   return new Promise((resolve, reject) => {
