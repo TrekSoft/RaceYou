@@ -114,9 +114,9 @@ export const pageLight = {
   backgroundColor: backgroundGrey
 }
 
-export const premium2Col = {
+export const premium3Col = {
   backgroundColor: premiumOrange,
-  flex: 4,
+  flex: 7,
   marginHorizontal: 5,
   alignItems: 'center'
 }
@@ -132,7 +132,7 @@ export const premiumMessage = {
   color: '#fff',
   fontWeight: 'bold',
   fontSize: 19,
-  maxWidth: 180,
+  maxWidth: 250,
   marginTop: 10,
   marginBottom: 10,
   textAlign: 'center'

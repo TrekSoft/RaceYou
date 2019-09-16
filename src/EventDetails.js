@@ -67,7 +67,11 @@ class EventDetails extends Component {
         {text: 'No, keep it', style: 'cancel'},
         {text: 'Yeah, I\'m sure', onPress: () =>
           this.props.cancelEvent(this.props.user, this.state.event)
-            .then(() => this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0))
+            .then(() => {
+              BackgroundGeolocation.removeListeners();
+              BackgroundGeolocation.stop();
+              this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0);
+            })
         },
       ],
       { cancelable: false }

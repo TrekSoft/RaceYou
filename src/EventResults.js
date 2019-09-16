@@ -71,21 +71,6 @@ class EventResults extends Component {
     return expires && new Date(expires.seconds * 1000).getTime() > new Date().getTime();
   }
 
-  renderPremiumCols() {
-    if(this.isPremium()) {
-      return (
-        <>
-          <Text numberOfLines={1} style={styles.tableCell}>M</Text>
-          <Text numberOfLines={1} style={styles.tableCell}>35</Text>
-        </>
-      );
-    } else {
-      return (
-        <View style={styles.premium2Col}><Text>Premium</Text></View>
-      );
-    }
-  }
-
   renderPremiumRank() {
     let genderRank, ageRank, genderAgeRank;
 
@@ -96,11 +81,11 @@ class EventResults extends Component {
     }
 
     return (
-      <View style={[styles.premiumStatsContainer, {padding: (this.isPremium() ? 0 : 10)}]}>
+      <View style={[styles.premiumStatsContainer, {padding: (this.isPremium() ? 0 : 20), paddingHorizontal: '9%'}]}>
         { !this.isPremium() &&
 
           <View style={styles.premiumOverlayContainer}>
-            <Text style={styles.premiumMessage}>Get age, gender, and splits for $1/month</Text>
+            <Text style={styles.premiumMessage}>Get age, gender, and elevation change: $1/month</Text>
             <Button style={styles.premiumButton} onPress={this.getPremium.bind(this)}><Text>Get Premium</Text></Button>
           </View>
         }
@@ -111,16 +96,9 @@ class EventResults extends Component {
           <View style={ styles.headerRankContainer }><View style={styles.listBoxDark}><Text style={[styles.countdown, { fontSize: 18 }]}>{genderAgeRank}</Text></View></View>
         </View>
 
-        <Button style={styles.button} onPress={() => Toast.show({
-            text: "Coming soon...",
-            style: {
-              backgroundColor: '#000'
-            },
-            duration: 3000
-          })}
-        >
-          <Text style={styles.buttonText}>View Splits</Text>
-        </Button>
+        <Text style={[styles.whiteText, { fontSize: 16 }]}>
+          Elevation is the runner's max altitude minus their min altitude in feet.
+        </Text>
       </View>
     );
   }
@@ -184,9 +162,12 @@ class EventResults extends Component {
             <>
               <Text numberOfLines={1} style={styles.tableCell}>{runner.gender}</Text>
               <Text numberOfLines={1} style={styles.tableCell}>{getAge(runner.birthday)}</Text>
+              <Text numberOfLines={1} style={[styles.tableCell, { flex: 3 }]}>
+                {runner.maxAlt && runner.minAlt ? (runner.maxAlt - runner.minAlt) | 0 : 0}ft
+              </Text>
             </>
           }
-          { !this.isPremium() && <View style={styles.premium2Col}><Text>Premium</Text></View> }
+          { !this.isPremium() && <View style={styles.premium3Col}><Text>Premium</Text></View> }
           <Text numberOfLines={1} style={styles.tableCell}>{formattedSeconds(runner.finalTime)}</Text>
         </View>
     );
@@ -195,7 +176,7 @@ class EventResults extends Component {
   render() {
     return (
       <Container>
-        <Content contentContainerStyle={[styles.page, styles.verticalTop]}>
+        <Content contentContainerStyle={[styles.page, styles.verticalTop, { paddingHorizontal: '1%'}]}>
           {this.renderSummary()}
 
           <View style={[styles.listBox, {marginBottom: 30, padding: 10, flex: 1, flexDirection: 'column' }]}>
@@ -204,13 +185,14 @@ class EventResults extends Component {
               <Text numberOfLines={1} style={[styles.tableHeading, { flex: 3 }]}>Name</Text>
               <Text numberOfLines={1} style={styles.tableHeading}>Sex</Text>
               <Text numberOfLines={1} style={styles.tableHeading}>Age</Text>
+              <Text numberOfLines={1} style={[styles.tableHeading, { flex: 3 }]}>Elevation</Text>
               <Text numberOfLines={1} style={styles.tableHeading}>Time</Text>
             </View>
 
             {this.renderResults()}
           </View>
 
-          <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexDirection: 'row', paddingHorizontal: '9%' }}>
             <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Sex</Text></View>
             <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Age</Text></View>
             <View style={ styles.headerRankContainer }><Text style={styles.headerRank}>Rank / Age + Sex</Text></View>
@@ -238,6 +220,15 @@ function formattedSeconds(seconds) {
   return zeroPad(Math.floor(seconds/60)) +
   ":" +
   zeroPad(Math.floor(seconds) % 60);
+}
+
+function truncateDecimals(num, digits) {
+  var numS = num.toString(),
+    decPos = numS.indexOf('.'),
+    substrLength = decPos === -1 ? numS.length : 1 + decPos + digits,
+    trimmedResult = numS.substr(0, substrLength);
+
+  return isNaN(trimmedResult) ? '0' : trimmedResult;
 }
 
 function zeroPad(myNumber) {

@@ -49,10 +49,7 @@ class Race extends Component {
 
     BackgroundGeolocation.onLocation(
       location => self.updateReadout(location),
-      error =>
-        firebase
-          .crashlytics()
-          .recordError(errorTypes.GPS_ERROR, this.props.user.id)
+      error => console.log(error)
     );
 
     BackgroundGeolocation.ready(
@@ -109,8 +106,11 @@ class Race extends Component {
 
         const oldLat = this.state.latitude;
         const oldLon = this.state.longitude;
+        let minAlt = user.minAlt;
+        let maxAlt = user.maxAlt;
         const newLat = position.coords.latitude;
         const newLon = position.coords.longitude;
+        const newAlt = position.coords.altitude;
         let newDist;
 
         if (oldLat != null && oldLon != null) {
@@ -121,8 +121,22 @@ class Race extends Component {
           newDist = this.state.distance;
         }
 
+        if (!minAlt || !maxAlt) {
+          minAlt = maxAlt = newAlt;
+        }
+
+        if (newAlt && newAlt < minAlt) {
+          minAlt = newAlt;
+        }
+
+        if (newAlt && newAlt > maxAlt) {
+          maxAlt = newAlt;
+        }
+
         let newRegistrants = this.state.event.registrants;
         newRegistrants[this.props.user.id].distance = newDist;
+        newRegistrants[this.props.user.id].minAlt = minAlt;
+        newRegistrants[this.props.user.id].maxAlt = maxAlt;
 
         let runnersArray = [];
         for (let key in newRegistrants) {
@@ -171,7 +185,7 @@ class Race extends Component {
             this.setState({
               longitude: newLon,
               latitude: newLat,
-              altitude: position.coords.altitude,
+              altitude: newAlt,
               distance: newDist
             });
           })
@@ -323,6 +337,10 @@ function zeroPad(myNumber) {
 
 function degreesToRadians(degrees) {
   return degrees * Math.PI / 180;
+}
+
+function metersToFeet(meterVal) {
+  return meterVal * 3.28084;
 }
 
 function distanceInMiles(lat1, lon1, lat2, lon2) {
