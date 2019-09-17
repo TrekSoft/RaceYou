@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Alert, Text } from 'react-native';
+import { View, Text } from 'react-native';
 import { Container, Content, Fab, Icon } from 'native-base';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
@@ -10,7 +10,6 @@ import { showErrorToast } from './utils/ErrorToast';
 import Runner from './components/Runner';
 import * as styles from './styles';
 import * as actions from './actions';
-import * as errorTypes from './constants/ErrorTypes';
 
 const RANK_PREFIX = 'rank_';
 const NUM_PREFIX = 'num_';
@@ -46,6 +45,7 @@ class Race extends Component {
   componentDidMount() {
     let self = this;
     firebase.analytics().setCurrentScreen('Race', 'RaceYou');
+    this.timeUpdater = setInterval(this.updateTime.bind(this), 1000);
 
     BackgroundGeolocation.onLocation(
       location => self.updateReadout(location),
@@ -71,6 +71,17 @@ class Race extends Component {
   clearUpdater() {
     BackgroundGeolocation.removeListeners();
     BackgroundGeolocation.stop();
+    clearInterval(this.timeUpdater);
+  }
+
+  updateTime() {
+    if (this.state.event) {
+      const now = new Date();
+
+      this.setState({
+        time: (now.getTime() - this.state.event.time.getTime()) / 1000
+      });
+    }
   }
 
   updateReadout(position) {
@@ -90,15 +101,7 @@ class Race extends Component {
         };
         this.setState({ event });
 
-        // Update time
-        const now = new Date();
-
-        // Bug with this.state.event.time
-        this.setState({
-          time: (now.getTime() - this.state.event.time.getTime()) / 1000
-        });
-
-        const user = event.registrants[this.props.user.id];
+        let user = event.registrants[this.props.user.id];
 
         if (user.distance) {
           this.setState({ distance: parseFloat(user.distance) });
@@ -133,14 +136,13 @@ class Race extends Component {
           maxAlt = newAlt;
         }
 
-        let newRegistrants = this.state.event.registrants;
-        newRegistrants[this.props.user.id].distance = newDist;
-        newRegistrants[this.props.user.id].minAlt = minAlt;
-        newRegistrants[this.props.user.id].maxAlt = maxAlt;
+        user.distance = newDist;
+        user.minAlt = minAlt;
+        user.maxAlt = maxAlt;
 
         let runnersArray = [];
-        for (let key in newRegistrants) {
-          runnersArray.push(newRegistrants[key]);
+        for (let key in event.registrants) {
+          runnersArray.push(event.registrants[key]);
         }
 
         runnersArray.sort((a, b) => b.distance - a.distance);
@@ -172,15 +174,14 @@ class Race extends Component {
           }
         }
 
-        if (newDist >= event.distance && !newRegistrants[this.props.user.id].finalPlace) {
+        if (newDist >= event.distance && !user.finalTime) {
           playSounds(['race_completed']);
-          newRegistrants[this.props.user.id].finalPlace = this.state.place;
-          newRegistrants[this.props.user.id].finalTime = this.state.time;
+          user.finalTime = this.state.time;
           firebase.analytics().logEvent('race_finished', { distance: event.distance });
         }
 
         doc
-          .set({ registrants: newRegistrants }, { merge: true })
+          .update('registrants.' + user.id, user)
           .then(() => {
             this.setState({
               longitude: newLon,
@@ -225,6 +226,12 @@ class Race extends Component {
 
   playUpdate() {
     let message = [];
+    message.push('distance');
+    message.push(getNumSound(this.state.distance|0));
+    message.push('point');
+    message = message.concat(getNumSound(decimalPortion(truncateDecimals(this.state.distance, 2))));
+    message.push('miles');
+
     const place = parseInt(this.state.place);
     if (!isNaN(place)) {
       message.push('you_are_currently');
@@ -287,23 +294,39 @@ class Race extends Component {
           <View style={styles.raceHeader}>
             <View style={styles.raceHeaderSection}>
               <Text style={styles.raceHeaderText}>
-                {truncateDecimals(this.state.distance, 2)}
+                {this.state.event ? truncateDecimals(this.state.distance, 2) : '--'}
               </Text>
               <Text style={styles.raceHeaderSubtext}>miles</Text>
             </View>
             <View style={styles.raceHeaderDivider}></View>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>
-                {zeroPad(Math.floor(this.state.time/60))}
-                :
-                {zeroPad(Math.floor(this.state.time) % 60)}
-              </Text>
+              {
+                this.state.event ?
+                  <>
+                    <Text style={styles.raceHeaderText}>
+                      {zeroPad(Math.floor(this.state.time / 60))}
+                      :
+                      {zeroPad(Math.floor(this.state.time) % 60)}
+                    </Text>
+                  </>
+                  :
+                  <Text style={styles.raceHeaderText}>
+                    --
+                  </Text>
+              }
               <Text style={styles.raceHeaderSubtext}>runtime</Text>
             </View>
             <View style={styles.raceHeaderDivider}></View>
             <View style={styles.raceHeaderSection}>
-              <Text style={styles.raceHeaderText}>{this.state.place}</Text>
-              <Text style={styles.raceHeaderSubtext}>/ {this.state.totalRunners}</Text>
+              {
+                this.state.event ?
+                  <>
+                    <Text style={styles.raceHeaderText}>{getNumberWithOrdinal(this.state.place)}</Text>
+                    <Text style={styles.raceHeaderSubtext}>/ {this.state.totalRunners}</Text>
+                  </>
+                  :
+                  <Text style={styles.raceHeaderText}>--</Text>
+              }
             </View>
           </View>
           <View style={{flex: 1, width: '100%', flexDirection: 'column'}}>
@@ -329,6 +352,13 @@ function truncateDecimals(num, digits) {
     trimmedResult = numS.substr(0, substrLength);
 
   return isNaN(trimmedResult) ? '0' : trimmedResult;
+}
+
+function decimalPortion(num) {
+  var numS = num + '',
+  decPos = numS.indexOf('.'),
+  decS = num.substr(decPos + 1);
+  return Number(decS);
 }
 
 function zeroPad(myNumber) {
@@ -398,6 +428,12 @@ function getNumSound(num) {
     return getNumSound((num-num%1000000)/1000000).concat(['million'].concat(getNumSound(num%1000000)));
   }
 }
+
+function getNumberWithOrdinal(n) {
+    var s=["th","st","nd","rd"],
+    v=n%100;
+    return n+(s[(v-20)%10]||s[v]||s[0]);
+ }
 
 const mapStateToProps = (state) => {
   return {

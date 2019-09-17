@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Alert, Text } from 'react-native';
-import { Container, Content, Button, Toast, Icon } from 'native-base';
+import { Container, Content, Button, Icon } from 'native-base';
 import firebase from 'react-native-firebase';
 import { connect } from 'react-redux';
 import * as styles from './styles';
@@ -59,8 +59,8 @@ class EventResults extends Component {
           const premiumExpirationDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
           firebase.firestore().collection('Users').doc(self.props.user.id)
           .update({ premiumExpirationDate })
-          .then(self.props.setUser({ ...self.props.user, premiumExpirationDate: {seconds: premiumExpirationDate.getTime()/1000}}));
-        }},
+          .then(self.props.setUser({ ...self.props.user, premiumExpirationDate: {seconds: premiumExpirationDate.getTime() / 1000}}));
+        }}
       ],
       {cancelable: false},
     );
@@ -74,7 +74,7 @@ class EventResults extends Component {
   renderPremiumRank() {
     let genderRank, ageRank, genderAgeRank;
 
-    if(this.isPremium()) {
+    if (this.isPremium()) {
         genderRank = 'Coming',
         ageRank = 'soon',
         genderAgeRank = '...'
@@ -104,7 +104,7 @@ class EventResults extends Component {
   }
 
   renderSummary() {
-    if(!this.state.user) {
+    if (!this.state.user) {
       return;
     }
 
@@ -113,14 +113,14 @@ class EventResults extends Component {
 
     return (
       <View style={{ marginTop: 30, marginBottom: 10, alignItems: 'center' }}>
-        <Text style={[styles.header, { marginBottom: 5 }]}>You finished {this.state.user && getNumberWithOrdinal(this.state.user.finalPlace)}</Text>
+        <Text style={[styles.header, { marginBottom: 5 }]}>You finished</Text>
         <Text style={styles.header}>{this.state.event.distance} miles @ {formattedSeconds(secondsPerMile)}/mile</Text>
       </View>
     );
   }
 
   renderResults() {
-    if(!this.state.event) {
+    if (!this.state.event) {
       return;
     }
 
@@ -234,12 +234,6 @@ function truncateDecimals(num, digits) {
 function zeroPad(myNumber) {
   return ("0" + myNumber).slice(-2);
 }
-
-function getNumberWithOrdinal(n) {
-    var s=["th","st","nd","rd"],
-    v=n%100;
-    return n+(s[(v-20)%10]||s[v]||s[0]);
- }
 
 const mapStateToProps = (state) => {
   return {

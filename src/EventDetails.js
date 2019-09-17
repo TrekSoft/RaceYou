@@ -51,9 +51,17 @@ class EventDetails extends Component {
     const startDate = this.state.event.time;
     const timeLeft = Math.floor((startDate.getTime() - currentDate.getTime()) / 1000);
 
-    if(timeLeft <= 0) {
+    if (timeLeft <= 0) {
       firebase.analytics().logEvent('race_started', { distance: this.state.event.distance });
-      this.props.navigation.navigate('Race', { eventId: this.state.event.id });
+      this.props.navigation.reset(
+        [
+          NavigationActions.navigate({
+            routeName: 'Race',
+            params: { eventId: this.state.event.id }
+          })
+        ],
+        0
+      );
     }
 
     this.setState({ timeLeft });

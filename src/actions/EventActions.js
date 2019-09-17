@@ -52,14 +52,17 @@ export const registerForEvent = (user, event) => (dispatch) => {
       user.events = {};
     }
 
-    event.registrants[user.id] = {id: user.id, username: user.username, gender: user.gender, birthday: user.birthday, distance: 0.0};
-    user.events[event.id] = {id: event.id, distance: event.distance, time: event.time};
+    const userRegistration = {id: user.id, username: user.username, gender: user.gender, birthday: user.birthday, distance: 0.0};
+    const eventRegistration = {id: event.id, distance: event.distance, time: event.time};
 
-    eventRef.update({registrants: event.registrants})
+    event.registrants[user.id] = userRegistration;
+    user.events[event.id] = eventRegistration;
+
+    eventRef.update('registrants.' + user.id, userRegistration)
     .then((data) => {
       dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
 
-      userRef.update({events: user.events})
+      userRef.update('events.' + event.id, eventRegistration)
       .then(() => {
         dispatch({ type: UPDATE_USER, payload: user });
       });
@@ -77,11 +80,11 @@ export const cancelEvent = (user, event) => (dispatch) => {
     delete user.events[event.id];
     delete event.registrants[user.id];
 
-    eventRef.update({registrants: event.registrants})
+    eventRef.update('registrants.' + user.id, firebase.firestore.FieldValue.delete())
     .then(() => {
       dispatch({ type: UPDATE_EVENT, payload: event, id: event.id });
 
-      userRef.update({events: user.events})
+      userRef.update('events.' + event.id, firebase.firestore.FieldValue.delete())
       .then(() => {
         dispatch({ type: UPDATE_USER, payload: user });
         resolve();

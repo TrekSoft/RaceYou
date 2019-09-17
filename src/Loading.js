@@ -60,10 +60,7 @@ class Loading extends Component {
           .loadUser(user.uid)
           .then(freshUser => {
             if (freshUser.username) {
-              this.props.navigation.reset(
-                [NavigationActions.navigate({ routeName: 'Home' })],
-                0
-              );
+              this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0);
             } else {
               this.setState({ isLoading: false });
             }
@@ -94,7 +91,7 @@ class Loading extends Component {
           this.state.birthMonth,
           this.state.birthYear
         )
-        .then(() => this.props.navigation.navigate('Home'));
+        .then(() => this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0));
     } else {
       showErrorToast('Oops, missing some info from you');
     }
