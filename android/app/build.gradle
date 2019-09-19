@@ -132,8 +132,8 @@ android {
         applicationId "com.raceyou"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.3"
+        versionCode 4
+        versionName "1.4"
         multiDexEnabled true
     }
     signingConfigs {
