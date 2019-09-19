@@ -3,7 +3,6 @@ import { View, ScrollView, Alert } from 'react-native';
 import { Container, Content, Button, Text } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
-import BackgroundGeolocation from 'react-native-background-geolocation';
 import firebase from 'react-native-firebase';
 import * as styles from './styles';
 import * as actions from './actions';
@@ -22,19 +21,6 @@ class EventDetails extends Component {
     firebase.analytics().setCurrentScreen('EventDetails', 'RaceYou');
     this.updateCountdown();
     this.countdown = setInterval(this.updateCountdown.bind(this), 1000);
-    BackgroundGeolocation.ready(
-      {
-        reset: true,
-        desiredAccuracy: BackgroundGeolocation.DESIRED_ACCURACY_HIGH,
-        distanceFilter: 1,
-        debug: false
-      },
-      state => {
-        if (!state.enabled) {
-          BackgroundGeolocation.start();
-        }
-      }
-    );
   }
 
   willLeavePage = this.props.navigation.addListener(
@@ -76,11 +62,9 @@ class EventDetails extends Component {
         {text: 'Yeah, I\'m sure', onPress: () =>
           this.props.cancelEvent(this.props.user, this.state.event)
             .then(() => {
-              BackgroundGeolocation.removeListeners();
-              BackgroundGeolocation.stop();
               this.props.navigation.reset([NavigationActions.navigate({ routeName: 'Home' })], 0);
             })
-        },
+        }
       ],
       { cancelable: false }
     );

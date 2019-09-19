@@ -260,6 +260,11 @@ class Loading extends Component {
           </View>
 
           {this.renderSubmitButton()}
+
+          <Text style={{ fontSize: 16, marginVertical: 20, color: 'rgba(255, 255, 255, .75)'}}>
+            Recommendation: Age and gender are displayed in race results so
+            choose something other than your real name as a username.
+          </Text>
         </View>
       );
     }

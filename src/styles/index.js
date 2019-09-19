@@ -132,7 +132,7 @@ export const premiumMessage = {
   color: '#fff',
   fontWeight: 'bold',
   fontSize: 19,
-  maxWidth: 250,
+  maxWidth: 350,
   marginTop: 10,
   marginBottom: 10,
   textAlign: 'center'
