@@ -29,6 +29,8 @@ target 'RaceYou' do
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
 
+  pod 'react-native-add-calendar-event', :path => '../node_modules/react-native-add-calendar-event'
+
   target 'RaceYouTests' do
     inherit! :search_paths
     # Pods for testing

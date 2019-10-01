@@ -77,7 +77,7 @@ class Home extends Component {
         const date = new Date(key);
         const month = moment(date).format('MMM');
         const day = moment(date).format('DD');
-        const year = moment(date).format('YYYY');
+        const dayOfWeek = moment(date).format('ddd');
         const events = dates[key];
 
         return (
@@ -98,7 +98,7 @@ class Home extends Component {
             >
               <Text style={{ fontSize: 15, color: '#666666' }}>{month}</Text>
               <Text style={styles.eventDateDay}>{day}</Text>
-              <Text style={{ fontSize: 15, color: '#666666' }}>{year}</Text>
+              <Text style={{ fontSize: 15, color: '#666666' }}>{dayOfWeek}</Text>
             </View>
             <View style={{ flexDirection: 'column', flex: 1 }}>
               {self.renderEvents(events, isRegistered)}
@@ -124,7 +124,7 @@ class Home extends Component {
           <View style={styles.listHeaderContainer}>
             <Text style={styles.header}>My Upcoming Events</Text>
           </View>
-          <View style={styles.listBox}>
+          <View style={[styles.listBox, { flex: 1 }]}>
             <ScrollView>
               {this.renderDates(this.props.userEvents, true)}
             </ScrollView>
@@ -133,20 +133,17 @@ class Home extends Component {
           <View style={styles.listHeaderContainer}>
             <Text style={styles.header}>Available Races</Text>
           </View>
-          <View style={[styles.listBox, { flex: 1, marginBottom: 20 }]}>
+          <View style={[styles.listBox, { flex: 1 }]}>
             <ScrollView>
               {this.renderDates(this.props.availableEvents, false)}
             </ScrollView>
           </View>
 
-          <Text style={[styles.whiteText, { fontSize: 16 }]}>
-            Problems/Questions/Feedback?
-          </Text>
           <Button
             style={[styles.button, { marginVertical: 15 }]}
             onPress={() => Linking.openURL('mailto:raceyouapp@gmail.com')}
           >
-            <Text>Email us</Text>
+            <Text>Questions/Feedback?</Text>
           </Button>
         </Content>
       </Container>

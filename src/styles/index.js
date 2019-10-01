@@ -89,7 +89,7 @@ export const listBoxDark = {
 }
 
 export const listHeaderContainer = {
-  marginTop: 40,
+  marginTop: 20,
   width: '100%',
   justifyContent: 'flex-start',
   flexDirection: 'row'

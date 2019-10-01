@@ -4,6 +4,8 @@ import { Container, Content, Button, Text } from 'native-base';
 import { NavigationActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import firebase from 'react-native-firebase';
+import * as AddCalendarEvent from 'react-native-add-calendar-event';
+import moment from 'moment';
 import * as styles from './styles';
 import * as actions from './actions';
 
@@ -70,6 +72,16 @@ class EventDetails extends Component {
     );
   }
 
+  addReminder() {
+    firebase.analytics().logEvent('race_reminder_added', { distance: this.state.event.distance });
+
+    AddCalendarEvent.presentEventCreatingDialog({
+      title: this.state.event.distance + ' mile RaceYou event',
+      startDate: moment(this.state.event.time).utc().format('YYYY-MM-DDTHH:mm:ss.SSS[Z]'),
+      location: 'Virtual - open the RaceYou app'
+    });
+  }
+
   renderParticipants() {
     return Object.values(this.state.event.registrants).map((registrant, index) =>
       <Text key={index}>{registrant.username}</Text>
@@ -103,6 +115,10 @@ class EventDetails extends Component {
               {this.renderParticipants()}
             </ScrollView>
           </View>
+
+          <Button style={[styles.button, {marginBottom: 20}]} onPress={() => this.addReminder()}>
+            <Text>Add Calendar Reminder</Text>
+          </Button>
 
           <Button style={[styles.buttonLight, {marginBottom: 20}]} onPress={() => this.cancelEvent()}>
             <Text>Cancel Registration</Text>
