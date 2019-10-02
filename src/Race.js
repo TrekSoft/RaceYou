@@ -76,10 +76,8 @@ class Race extends Component {
 
   updateTime() {
     if (this.state.event) {
-      const now = new Date();
-
       this.setState({
-        time: (now.getTime() - this.state.event.time.getTime()) / 1000
+        time: (new Date().getTime() - this.state.event.time.getTime()) / 1000
       });
     }
   }
@@ -176,7 +174,7 @@ class Race extends Component {
 
         if (newDist >= event.distance && !user.finalTime) {
           playSounds(['race_completed']);
-          user.finalTime = this.state.time;
+          user.finalTime = (new Date().getTime() - this.state.event.time.getTime()) / 1000;
           firebase.analytics().logEvent('race_finished', { distance: event.distance });
         }
 
